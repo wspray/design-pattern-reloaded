@@ -34,6 +34,7 @@ class Memoizer~V,R~ {
 ```
 
 This is how it can be used:
+
 ```java
 var memoizer = new Memoizer<Integer, Integer>() {
   @Override
@@ -52,12 +53,12 @@ either the computation in `compute` calling recursively the method `compute()` i
 `memoize()` or a user using the method `compute()` directly instead of the method `memoize()`.
 This second mistake is less frequent because `compute` is declared protected an not public.
 
-
 ## The Memoizer Pattern using delegation
 
-As usual the solution is to avoid inheritance and use delegation instead. 
+As usual the solution is to avoid inheritance and use delegation instead.
 
 So the class `Memoizer` can be written that way
+
 ```java
 final class Memoizer<V, R> {
   private final Function<? super V, ? extends R> function;
@@ -74,6 +75,7 @@ final class Memoizer<V, R> {
 ```
 
 but in that case, the method `memoize()` is not available inside the lambda
+
 ```java
 var memoizer = new Memoizer<Integer, Integer>(n -> {
       if (n < 2) {
@@ -83,8 +85,8 @@ var memoizer = new Memoizer<Integer, Integer>(n -> {
     });
 ```
 
-
 To solve that, we need to introduce a second parameter able to do recursive call, like this
+
 ```java
 var fibo = new Memoizer<Integer, Integer>((n, fib) -> {
       if (n < 2) {
@@ -95,6 +97,7 @@ var fibo = new Memoizer<Integer, Integer>((n, fib) -> {
 ```
 
 this leads to the following code for the class `Memoizer`
+
 ```java
 final class Memoizer<V, R> {
   private final BiFunction<? super V, Function<? super V, ? extends R>, ? extends R> bifunction;

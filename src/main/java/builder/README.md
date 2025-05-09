@@ -4,11 +4,13 @@ By default, when creating an instance, the arguments of the constructor are pass
 the association between an argument and a parameter depends on the position of the argument.
 
 For example, if we define a `Spaceship`
+
 ```java
 record Spaceship(String name, String captain, int torpedoes, int length) {}
 ```
 
 an instance is created by calling the constructor
+
 ```java
 var spaceship = new Spaceship("foo", 'baz', 3, 4);
 ```
@@ -18,6 +20,7 @@ is initialized with which value, apart from taking a look at the definition of t
 
 A builder improves the readability of the code by introducing method calls (that have a name)
 to initialize each component.
+
 ```java
 var spaceship = new SpaceshipBuilder()
     .name("USS Enterprise")
@@ -28,7 +31,7 @@ var spaceship = new SpaceshipBuilder()
 ```
 
 A builder is a mutable class that allows to initialize an object by name.
-All the intermediary methods return the builder itself (`this`) so the method calls can be chained. 
+All the intermediary methods return the builder itself (`this`) so the method calls can be chained.
 
 ```mermaid
 classDiagram
@@ -84,7 +87,6 @@ public class SpaceshipBuilder {
 
 The main issue with this pattern is that it requires usually quite a lot of code and that IDEs do not track
 the fact that if a component of the record is renamed, the method of the builder should be renamed too.
-
 
 ## A generic builder
 

@@ -9,6 +9,7 @@ the environment variable "HOSTNAME" or the Java property "hostname" or the prope
 "hostname" of a configuration file or to use "localhost".
 
 This can be written that way
+
 ```java
 public static String findHostname() {
   // 1
@@ -42,11 +43,12 @@ public static String findHostname() {
 
 ## Railway switch pattern
 
-The aim of the railway switch pattern is to simplify codes that do a cascade of **if ...  else**
+The aim of the railway switch pattern is to simplify codes that do a cascade of **if ... else**
 by creating higher level constructs (functions), here `environment()`, `systemProperty()`,
 `fileProperty()`, and a way to compose them (the function `or()`).
 
 For our example, we want a code like this
+
 ```java
   static String findHostname() {
     return environment("HOSTNAME")

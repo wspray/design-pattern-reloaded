@@ -26,6 +26,7 @@ class Address {
 ```
 
 Here is an example of use (`info()` display the values of the state)
+
 ```java
 var cart = new Cart();
 cart.add(new Article("Lego Kit", 9999));
@@ -110,9 +111,8 @@ class Cart {
 }
 ```
 
-but it is not clear which values (`articles` and `address`) is available at which state 
+but it is not clear which values (`articles` and `address`) is available at which state
 and it makes all values mutable.
-
 
 ## An implementation with a hierarchy
 

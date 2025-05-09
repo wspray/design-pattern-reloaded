@@ -9,6 +9,7 @@ interface Logger {
 ```
 
 and we have an existing API that takes a `Logger`
+
 ```java
 public static void sayHello(Logger logger) {
   logger.log("hello");
@@ -16,6 +17,7 @@ public static void sayHello(Logger logger) {
 ```
 
 Now, we introduce another logging API named `Logger2`, perhaps from another library
+
 ```java
 enum Level { WARNING, ERROR }
 
@@ -38,6 +40,7 @@ public static Logger adapt(Logger2 logger2, Level level) {
 ```
 
 And we can use the method `adapt()` like this
+
 ```java
 Logger logger = adapt(logger2, Level.WARNING);
 logger.log("abort abort !");
@@ -49,6 +52,7 @@ to a method call to the old interface.
 ## Adapter when we control Logger2
 
 If we control `Logger2`, the method `adapt()` can be an instance method of `Logger2`
+
 ```java
 interface Logger2 {
   void log(Level level, String message);
@@ -81,6 +85,7 @@ LoggerLambda --> Logger2 : delegates
 ```
 
 and we can call `adapt()` directly on an instance of `Logger2`
+
 ```java
 Logger logger = logger2.adapt(Level.WARNING);
 logger.log("abort abort !");

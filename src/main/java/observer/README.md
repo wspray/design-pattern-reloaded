@@ -4,6 +4,7 @@ The point of the observer pattern is to decouple two pieces of code by using an 
 
 Let say we want to model a `StockExchange` that have a balance and contains several quantities of stocks.
 For example, here the balance is 5 000 and wa have 1 000 stocks of FOOGL and 2 000 stocks of PAPL.
+
 ```java
   static void main(String[] args) {
     var stockExchange = new StockExchange();
@@ -33,6 +34,7 @@ StockExchange ..> Order : process
 An exchange is able to process orders and group the rejected orders by `accountId`.
 An order is rejected if the exchange has no enough stock to process a BUY order,
 here the last BUY order can not be processed because the exchange has not 3 000 stocks of FOOGL.
+
 ```java
   record Order(Kind kind, int quantity, String tick, int accountId) {
     enum Kind { BUY, SELL }
@@ -52,6 +54,7 @@ here the last BUY order can not be processed because the exchange has not 3 000 
 ```
 
 This is the code of the `StockExchange`
+
 ```java
   class StockExchange {
     private final TreeMap<String, Integer> stockMap = new TreeMap<>();
@@ -94,7 +97,6 @@ This is the code of the `StockExchange`
   }
 ```
 
-
 We now want to add a code to log if the balance is less than 0 or more than 6 000, because
 having a negative balance is always bad and having too much money in a hot wallet is bad too.
 
@@ -108,6 +110,7 @@ It's better to decouple those thing by introducing an observer.
 An observer is an interface used to publish the state of an object so a code can react to it.
 
 In our example, let's define a `BalanceObserver` that will be called each time the balance change
+
 ```java
 interface BalanceObserver {
   void balanceChanged(int newValue);
@@ -128,6 +131,7 @@ StockExchange --> "1" BalanceObserver : balanceObserver
 ```
 
 We take the `BalanceObserver` at creation and called it each time the balance changed
+
 ```java
 class StockExchange {
     private final BalanceObserver balanceObserver;
@@ -166,6 +170,7 @@ class StockExchange {
 ```
 
 We can now implement the observer with the correct semantics
+
 ```java
     BalanceObserver balanceObserver = newValue -> {
       if (newValue < 0) {
@@ -180,7 +185,7 @@ We can now implement the observer with the correct semantics
     ...
 ```
 
-As you can see, the code that reacts to the value of the balance being changed  is separated from
+As you can see, the code that reacts to the value of the balance being changed is separated from
 the code that process the orders thanks to the observer pattern.
 
 Note: historically, the observer pattern was called the observable/observer pattern and was able
@@ -189,6 +194,7 @@ We now prefer to have only one observer and to use the design __pattern composit
 we have several observers.
 
 Here is an example of such composite
+
 ```java
   record CompositeObserver(List<Observer> observers) implements Observer {
     public void balanceChanged(int newValue) {
@@ -248,6 +254,7 @@ interface OrderObserver {
 You can note that this observer does not have to be stored in a field if it is only useful for a treatment.
 
 And in the `main()`, we can create the list that will store all rejected orders
+
 ```java
   ...
   var rejectedOrderList = new ArrayList<Order>();
@@ -258,6 +265,7 @@ And in the `main()`, we can create the list that will store all rejected orders
 ```
 
 or using a stream + mapMulti(), avoid the creation of the intermediary list
+
 ```java
   ...
   var rejectedOrders = Stream.of(stockExchange)

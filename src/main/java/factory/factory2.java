@@ -5,29 +5,35 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public interface factory2 {
-  enum Color { RED, BLUE }
-  interface Vehicle { }
-  record Car(Color color) implements Vehicle { }
-  record Bus(Color color) implements Vehicle { }
+    enum Color {RED, BLUE}
 
-  @FunctionalInterface
-  interface VehicleFactory {
-    Vehicle create(Color color);
-
-    default Supplier<Vehicle> bind(Color color) {
-      return () -> create(color);
+    interface Vehicle {
     }
-  }
 
-  static List<Vehicle> create5(Supplier<Vehicle> factory) {
-    return Stream.generate(factory).limit(5).toList();
-  }
-  
-  static void main(String[] args) {
-    VehicleFactory carFactory = Car::new;
-    VehicleFactory busFactory = Bus::new;
+    record Car(Color color) implements Vehicle {
+    }
 
-    System.out.println(create5(carFactory.bind(Color.RED)));
-    System.out.println(create5(busFactory.bind(Color.BLUE)));
-  }
+    record Bus(Color color) implements Vehicle {
+    }
+
+    @FunctionalInterface
+    interface VehicleFactory {
+        Vehicle create(Color color);
+
+        default Supplier<Vehicle> bind(Color color) {
+            return () -> create(color);
+        }
+    }
+
+    static List<Vehicle> create5(Supplier<Vehicle> factory) {
+        return Stream.generate(factory).limit(5).toList();
+    }
+
+    static void main(String[] args) {
+        VehicleFactory carFactory = Car::new;
+        VehicleFactory busFactory = Bus::new;
+
+        System.out.println(create5(carFactory.bind(Color.RED)));
+        System.out.println(create5(busFactory.bind(Color.BLUE)));
+    }
 }

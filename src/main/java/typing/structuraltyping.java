@@ -1,28 +1,28 @@
 package typing;
 
 public interface structuraltyping {
-  interface I {
-    void m();
-  }
-  
-  class A {
-    public void m() { 
-      System.out.println("A::m");
+    interface I {
+        void m();
     }
-  }
-  
-  class B {
-    public void m() { 
-      System.out.println("B::m");
+
+    class A {
+        public void m() {
+            System.out.println("A::m");
+        }
     }
-  }
-  
-  static void print(I i) {
-    i.m();
-  }
-  
-  static void main(String[] args) {
-    print(new A()::m);
-    print(new B()::m);
-  }
+
+    class B {
+        public void m() {
+            System.out.println("B::m");
+        }
+    }
+
+    static void print(I i) {
+        i.m();
+    }
+
+    static void main(String[] args) {
+        print(new A()::m);
+        print(new B()::m);
+    }
 }

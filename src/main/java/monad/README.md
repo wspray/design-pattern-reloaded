@@ -3,12 +3,14 @@
 A monad is a class that encapsulates several disjoint states.
 
 Let say we have a `User` that comes from an untrusted source, by example, deserialized from a JSON request.
+
 ```java
 record User(String name, int age) { }
 ```
 
 We want to validate that none of the values of that object is illegal,
 a simple solution is to write a method `validateUser` like this
+
 ```java
 public static void validateUser(User user) {
   if (user.name().isEmpty()) {
@@ -25,7 +27,7 @@ A solution is to delay the report of the errors, gathering all of them and at th
 This requires to have an object that can store the value to validate (here a user) and all the error at
 the same time.
 
-## Enter the monad 
+## Enter the monad
 
 ```java
 record Error(IllegalArgumentException e, Error next) { }
@@ -52,6 +54,7 @@ record Validator<V>(V value, Error error) {
 A monad stores both the value and an error (here a linked list of exceptions).
 
 It has two kind of methods
+
 - intermediary operation, here `check(predicate, message)` that checks the value and return a new instance of monad
   with the states updated
 - final operations that stop the processing, here `orElseThrow()` that returns the value or reports the exceptions.
@@ -68,6 +71,7 @@ class Validator~V~ {
 ```
 
 With that `validateUser()` can be written that way
+
 ```java
 public static User validateUser(User user) {
   return new Validator<>(user, null)

@@ -3,6 +3,7 @@
 A chain of responsibility is a linked list of action that each take care of a part of a message/request.
 
 Let say we have a `Logger` with 3 `Level` of error message.
+
 ```java
 enum Level {
   INFO, WARNING, ERROR
@@ -15,6 +16,7 @@ interface Logger {
 Now, supose that we want to write a `Logger` that log the message on the console.
 The idea of the chain of responsibility is not only do the work specific of the `Logger`
 (logging to the console) but also to delegate the work to the next `Logger` in the chain if it exists.
+
 ```java
 record ConsoleLogger(Level level, Logger logger) implements Logger {
   @Override
@@ -30,6 +32,7 @@ record ConsoleLogger(Level level, Logger logger) implements Logger {
 ```
 
 Using the same pattern, we can implement a `Logger` that log the error message on a file
+
 ```java
 record FileLogger(Level level, Logger logger) implements Logger {
   @Override
@@ -67,6 +70,7 @@ FileLogger --> Logger : logger
 ```
 
 And use the different loggers by creating a linked list of loggers
+
 ```java
 static void main(String[] args) {
   var logger = new FileLogger(Level.WARNING, new ConsoleLogger(Level.INFO, null));
@@ -75,14 +79,13 @@ static void main(String[] args) {
 }
 ```
 
-
-
 ## use delegation to share behavior
 
 We can de-structure a bit the pattern by recognizing the checking the message level again the logger level
 and delegating to another logger operation can be written only once.
 
 In that case, the console logger and the file logger are just lambdas
+
 ```java
 interface Logger {
   void log(Level messageLevel, String message);
@@ -111,6 +114,7 @@ and add a [decorator](../decorator) that filter the message depending on the mes
 ```
 
 and add another [decorator](../decorator) that delegate the logging of a message to another logger
+
 ```java
   
   default Logger withLogger(Logger logger) {
@@ -122,7 +126,8 @@ and add another [decorator](../decorator) that delegate the logging of a message
 }
 ```
 
-Now creating the different logger is done by composing the different loggers 
+Now creating the different logger is done by composing the different loggers
+
 ```java
 static void main(String[] args) {
   var logger = Logger.file().withLevel(Level.WARNING)

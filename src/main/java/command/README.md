@@ -22,7 +22,7 @@ class Config {
 }
 ```
 
-If we suppose that there is a method `config` that takes a list of arguments and returns a configuration  object,
+If we suppose that there is a method `config` that takes a list of arguments and returns a configuration object,
 the `main`should be something like this
 
 ```java
@@ -39,6 +39,7 @@ if (config.showHelp) {
 ```
 
 A straw-man implementation of the method config can be this one
+
 ```java
 static Config config(List<String> args) {
   var config = new Config();
@@ -126,6 +127,7 @@ class CommandRegistry {
 ```
 
 We need a method to configure the `CommandRegistry` i.e. register all the commands with their options
+
 ```java
 static CommandRegistry commandRegistry() {
   var registry = new CommandRegistry();
@@ -139,6 +141,7 @@ static CommandRegistry commandRegistry() {
 
 And we modify the `main` a little, to ask for the `CommmandRegistry` and pass it as parameter
 of the method `config`.
+
 ```java
 var registry = commandRegistry();
 var config = config(registry, List.of(args));
@@ -151,6 +154,7 @@ if (config.showHelp) {
 In the method `config`, we loop over the argument, find the corresponding command (if it's an option)
 and call the `action` of the `Command` on the `Config` object. We also check that we don't see a command
 with the same name twice.
+
 ```java
 static Config config(CommandRegistry registry, List<String> args) {
   var config = new Config();
@@ -173,13 +177,13 @@ We can change the code of the CommandRegistry a bit because we can recognize tha
 and the method `command` are not called at the same time, so separating them using
 the [builder pattern](../builder) may make the code easier to use.
 
-
 ## Using a builder
 
 The idea is to have a builder to register all the options and to ask for the `CommandRegistry` once
 all the options with their corresponding command are registered.
 
 Let's refactor the code (change the code without changing the API) of `CommandRegistry`
+
 ```java
 static CommandRegistry commandRegistry() {
   return new CommandRegistry.Builder()
@@ -194,6 +198,7 @@ static CommandRegistry commandRegistry() {
 Given that the `CommandRegitry` has no method `registerOptions` anymore, it's just something
 that encapsulates the `Map` of `Command` and the help description.
 So it can be modelled by a record like this:
+
 ```java
 record CommandRegistry(Map<String, Command> commandMap, String help) {
   public static class Builder {

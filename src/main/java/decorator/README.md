@@ -1,8 +1,8 @@
 # The Decorator Pattern
 
-A decorator is a simple way  to a dynamically enhance and existing behavior using composition.
+A decorator is a simple way to a dynamically enhance and existing behavior using composition.
 
-Let say we have an interface `Coffee` that describe a Coffee by its cost and its ingredients 
+Let say we have an interface `Coffee` that describe a Coffee by its cost and its ingredients
 
 ```java
 interface Coffee {
@@ -112,12 +112,11 @@ System.out.println("cost: " + coffeeWithMilkAndSprinkles.cost() + " cents");
 This pattern is more powerful than the inheritance because it relies on the delegation which is a dynamic relation
 while the inheritance/extends is a static relation.
 
-
 ## Improving the API if the hierarchy is sealed
 
 We can improve the API if we do not allow users to define their own coffee,
 we can sealed the interface and provide instance methods (`withMilk`` and `withSprinkles` here)
-to create a decorator from an existing instance more easily. 
+to create a decorator from an existing instance more easily.
 
 ```java
 sealed interface Coffee permits SimpleCoffee, WithMilk, WithSprinkles {
@@ -149,10 +148,9 @@ System.out.println("cost: " + coffeeWithMilkAndSprinkles.cost() + " cents");
 Apart from being easier in terms of method discovery, this API also does not explicitly reference the names
 of the implementations so `SimpleCoffee`, `WithMilk` and `WithSprinkles` can be hidden and non-public.
 
-
 ## Relation with the Proxy Pattern
 
-A proxy is a decorator, so it implements an interface and delegate to an instance of that interface 
+A proxy is a decorator, so it implements an interface and delegate to an instance of that interface
 but it has a different intent, the idea to intercept method calls to do cross-cutting operations
 like logging, authentication, caching, etc.
 

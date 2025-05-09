@@ -1,4 +1,5 @@
 # Design Patterns Reloaded
+
 Implementation of some design patterns in Java 21,
 some of them are from the GoF, others are the one you usually see in programs.
 
@@ -12,17 +13,17 @@ but also emphasis immutability when necessary.
 - [command](src/main/java/command), objects that are actions
 - [decorator](src/main/java/decorator) dynamically adds behavior to an existing object
 - [factory](src/main/java/factory) abstracts the creation of objects
-- [memoizer](src/main/java/memoizer) caches the result of a computation to avoid multiple re-computations of the same value
-- [monad](src/main/java/monad) wraps multiple disjoint states under a common API 
+- [memoizer](src/main/java/memoizer) caches the result of a computation to avoid multiple re-computations of the same
+  value
+- [monad](src/main/java/monad) wraps multiple disjoint states under a common API
 - [observer](src/main/java/observer) de-couples codes by pushing the values from an object to another one
 - proxy see [decorator](src/main/java/decorator)
 - singleton see [abstract-factory](src/main/java/abstractfactory)
 - [railwayswitch](src/main/java/railwayswitch) abstracts a cascade of if ... else
 - [state](src/main/java/state) delegates API implementation to an internal state object
-- [template_method](src/main/java/templatemethod) define a behavior with a generic part and a specific part 
+- [template_method](src/main/java/templatemethod) define a behavior with a generic part and a specific part
 - [typing](src/main/java/typing), 3 kinds of relations between a static type and a runtime class
 - [visitor / pattern matching](src/main/java/visitor), specify operations on a hierarchy of types outside that hierarchy
-
 
 ## Old materials
 
