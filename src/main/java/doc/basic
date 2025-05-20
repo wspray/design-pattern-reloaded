@@ -1,0 +1,43 @@
+Error:
+    OutOfMemoryError
+    StackOverFlowError
+Exception:
+    RuntimeException:
+        NullPointerException
+        ArrayIndexOutOfBoundsException
+        StringIndexOutOfBoundsException
+        IllegalArgumentException
+        ClassCastException
+        ArithmeticException
+    CheckedException:
+        FileNotFoundException
+        IOException
+        EOFException
+        SQLException
+        ClassNotFoundException
+        InterruptedException
+
+浅拷贝只是复制了对象的引用（地址），而深拷贝则是复制了对象本身（新建对象）
+Person originalPerson = new Person("John", 25);
+浅拷贝：Person copiedPerson = new Person(originalPerson);
+深拷贝：Person copiedPerson = new Person(originalPerson);
+
+重载（Overloading）：
+    定义：在同一类中，允许定义多个同名方法，但这些方法的参数列表必须不同。
+    参数列表不同：参数的数量、类型或顺序不同。
+    返回类型：可以相同，也可以不同。
+    作用：增加方法的灵活性，允许使用相同的方法名处理不同的数据类型或数量的参数。
+重写（Overriding）：
+    定义：在子类中重新定义父类的方法，方法名、参数列表和返回类型必须完全相同。
+    参数列表相同：方法名、参数列表和返回类型必须与父类中的方法完全一致。
+    作用：允许子类提供特定的实现，覆盖父类的默认行为。
+
+集合类存放于 Java.util 包中，主要由Collection和Map
+Collection：Collection 是集合 List、Set、Queue 的最基本的接口
+Map：是映射表的基础接口：HashMap,TreeMap,HashTable
+
+特性	            Set	                                            List
+元素是否可重复	不允许重复元素	                                允许元素重复
+元素的顺序	    不保证（有序与否取决具体实现，                       有序（插入顺序保证，除非特别实现；索引可用）
+                如HashSet无序，LinkedHashSet有序，TreeSet是排序）	访问方式	主要通过元素本身查找，不通过索引	通过索引访问元素（如list.get(i)）
+典型实现类	    HashSet、LinkedHashSet、TreeSet	                ArrayList、LinkedList
