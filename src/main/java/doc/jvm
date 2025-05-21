@@ -15,3 +15,91 @@ https://www.cnblogs.com/xiaoxi/p/6486852.html
 1. 该类的所有实例都已经被回收，即Java堆中不存在该类的任何实例。
 2. 加载该类的ClassLoader已经被回收。
 3. 该类对应的java.lang.Class对象没有在任何地方被引用，无法在任何地方通过反射访问该类的方法。
+
+线程状态：新建状态、就绪状态、运行状态、阻塞状态、死亡状态
+1.New      新建了一个线程对象
+2.Runnable 线程就绪，可运行，等待CPU使用权
+3.Running  线程获取CPU,执行代码
+4.Blocked  线程因为某种原因放弃CPU使用权，暂时停止运行
+          等待阻塞(运行的线程调用wait方法，线程会释放占用的资源，进入等待队列，自身不能被唤醒，只能依靠其他线程调用notify/notifyAll才能被唤醒)
+          同步阻塞(运行的线程在获取对象同步锁时，同步锁被其他线程占用，则进入同步队列阻塞等待)
+          其他阻塞(运行的线程执行sleep超时等待或join等待其他线程或发出IO请求InputStrem.read()从文件或网络读取数据时，线程会阻塞，直到数据可用）
+5.Dead/TERMINATED 线程执行完毕或异常退出
+
+（1）为什么wait()必须在同步（Synchronized）方法/代码块中调用？
+答：调用wait()就是释放锁，释放锁的前提是必须要先获得锁，先获得锁才能释放锁。
+（2）为什么notify(),notifyAll()必须在同步（Synchronized）方法/代码块中调用？
+答：notify(),notifyAll()是将锁交给含有wait()方法的线程，让其继续执行下去（本质是让处于入口队列的线程竞争锁）
+这是因为调用这三个方法之前必须拿要到当前锁对象的监视器monitor对象，也就是说notify/notifyAll和wait方法依赖于monitor对象，
+又因为monitor存在于对象头的Mark Word中(存储monitor引用指针)，
+而synchronized关键字可以获取monitor ，所以，notify/notifyAll和wait方法必须在
+synchronized代码块或者synchronized方法中调用。
+
+hotspot是顺序唤醒的LIFO!! 这是个重点! 有疑惑的百度: notify()是随机唤醒线程么?)
+调用notify()或者notifyAll()时，并不会真正释放对象锁，必须等到synchronized方法或者语法块执行完才真正释放锁
+
+线程中断的作用：
+           线程中断可以使一个线程从等待状态变成就绪状态，
+           如果中断的线程正处于运行状态，那么这个中断是不会用任何作用的（表面上不会影响正在运行的线程），线程恢复到就绪状态后，可以继续执行逻辑代码，
+           如果出于等待状态，（使用中断起作用）想要让一个线程从等待状态中恢复过来有三种发送：一.等待超时，二.得到一个通知，三.使用中断
+线程中断的原理：
+         Thread.interrupt()方法仅仅是在当前线程中打了一个停止的标识将中断标志修改为true，并没有真正的停止线程。
+         如果在此基础上进入堵塞状态（sleep(),wait(),join()）,马上就会抛出一个InterruptedException，且中断标志被清除，重新设置为false。
+
+对于非阻塞中的线程, 只是改变了中断状态, 即Thread.isInterrupted()将返回true;
+对于可取消的阻塞状态中的线程, 比如等待在这些函数上的线程, Thread.sleep(), Object.wait(), Thread.join(),
+这个线程收到中断信号后, 会抛出InterruptedException, 同时会把中断状态置回为false.但调用Thread.interrupted()会对中断状态进行复位。
+
+响应中断的方法和不响应中断的方法：
+     响应中断的方法： 线程进入等待或是超时等待的状态后，调用interrupt方法都是会响应中断的，所以响应中断的方法：
+            Object.wait()、Thread.join、Thread.sleep、LockSupport.park的有参和无参方法。
+     不响应中断的方法：线程进入阻塞状态后，是不响应中断的，等待进入synchronized的方法或是代码块，都是会被阻塞的，此时不会响应中断，
+     另外还有一个不响应中断的，那就是阻塞在ReentrantLock.lock方法里面的线程，也是不响应中断的，如果想要响应中断，可以使用ReentrantLock.lockInterruptibly方法。
+
+线程中断后为什么要调用interrupt()?
+    为了继续传递中断信号,遵循协作式中断规范。中断是将阻塞的线程打上中断标志修改为true，当wait()方法被中断后会抛出InterruptedException, 同时会把中断状态置回为false
+    此时避免“吞掉”中断信号,线程需主动检查状态或处理异常来响应中断。
+    private void innerMethod() throws InterruptedException {
+     try {
+         Thread.sleep(1000);
+     } catch (InterruptedException e) {
+         // 恢复中断状态，并抛出异常供上层处理
+         Thread.currentThread().interrupt();
+         throw e;
+     }
+ }
+thread.interrupt()	    主动请求中断线程（需配合响应逻辑）。
+Thread.interrupted()	静态检查当前线程中断状态，并清除状态（适合单次检查后不再需要状态的场景）。
+thread.isInterrupted()	检查目标线程的中断状态，不修改状态（适合循环检查或需要保留状态的场景）。
+
+sleep和wait区别：
+1.sleep是Thread类的静态方法，wait是Object类的本地方法，依赖synchronized关键字
+2.sleep不会释放锁，wait释放锁并进入等待队列，需要notify唤醒（sleep会让出CPU执行时间，把执行权释放出去，不再运行此线程，当定时时间结束后再取回cpu资源）
+3.sleep一般用于当前线程休眠，wait用于多线程通信
+
+yield()执行后线程直接进入就绪状态，马上释放CPU资源，但是保留了cpu执行资格，有可能再此获取到执行权（本意是让其他线程执行）
+join()执行后进入阻塞状态，B线程调用A线程的join()方法，B进入阻塞队列，等待A结束或中断，B再继续执行
+
+在Java中，堆（Heap）和栈（Stack）是两种非常重要的内存区域
+1. 栈（Stack）
+栈是线程私有的内存区域，每个线程在创建时都会分配一个栈。栈用于存储线程的局部变量、方法调用的上下文信息（如方法的参数、局部变量、返回地址等）以及部分结果。
+主要特点：
+    线程私有：每个线程都有自己的栈，线程之间不能共享栈内存。
+    生命周期：栈的生命周期与线程的生命周期相同。线程启动时创建栈，线程结束时栈被销毁。
+存储内容：
+    局部变量（包括基本数据类型和对象引用）。
+    方法调用的上下文信息（如方法的参数、局部变量、返回地址等）。
+内存分配：栈内存由JVM自动分配和管理，通常是一个固定大小的区域。
+内存溢出：如果线程的栈空间不足（例如，递归调用过深），会抛出StackOverflowError。
+
+2. 堆（Heap）
+堆是所有线程共享的内存区域，用于存储对象实例和数组。堆是Java内存模型（JMM）的核心部分，也是垃圾回收（Garbage Collection, GC）的主要区域。
+主要特点：
+    线程共享：堆是所有线程共享的内存区域，线程之间可以共享堆中的对象。
+    生命周期：堆的生命周期与JVM的生命周期相同。JVM启动时创建堆，JVM结束时堆被销毁。
+存储内容：
+    所有通过new关键字创建的对象实例。
+    所有数组。
+内存分配：堆内存由JVM自动分配和管理，通常是一个动态分配的区域。
+内存溢出：如果堆空间不足，会抛出OutOfMemoryError。
+垃圾回收：堆是垃圾回收的主要区域，JVM会定期回收不再使用的对象，释放内存。
