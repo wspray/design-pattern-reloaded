@@ -1,0 +1,179 @@
+1.BeanDefinition
+BeanDefinition实际就是POJO对象在IOC容器中的抽象
+它包含了Bean的各种属性和方法，例如id（标识符）、class（类名）、scope（作用域）、ref（依赖的Bean）等
+IOC容器初始化过程中：
+    通过loadBeanDefinitions（classPath和Annotation注定义的bean）将BeanDefiniton注入到HashMap中，完成Bean定义的载入
+    随后getBean()非Lazy注入的类中完成依赖注入
+BeanDefinition接口定义了Bean的基本属性和行为
+    类名和作用域
+        getBeanClassName：获取Bean的类名。setBeanClassName：设置Bean的类名。
+        getScope：获取Bean的作用域（如singleton、prototype等）。	setScope：设置Bean的作用域。
+    构造函数参数和属性值
+        getConstructorArgumentValues：获取Bean的构造函数参数。
+        getPropertyValues：获取Bean的属性值。
+    生命周期回调方法
+        getInitMethodName：获取Bean的初始化方法名。	setInitMethodName：设置Bean的初始化方法名。
+        getDestroyMethodName：获取Bean的销毁方法名。	setDestroyMethodName：设置Bean的销毁方法名。
+    依赖关系
+        getDependsOn：获取Bean的依赖关系。	setDependsOn：设置Bean的依赖关系。
+    其他属性
+        isAbstract：判断Bean是否是抽象的。	setAbstract：设置Bean是否是抽象的。
+        isLazyInit：判断Bean是否是延迟加载的。	setLazyInit：设置Bean是否是延迟加载的。
+        getAliases：获取Bean的别名。	setAliases：设置Bean的别名。
+        getDescription：获取Bean的描述信息。	setDescription：设置Bean的描述信息。
+        getResourceDescription：获取Bean的资源信息。	setResourceDescription：设置Bean的资源信息。
+        getOriginatingElement：获取Bean的元数据。	setOriginatingElement：设置Bean的元数据。
+    常见的BeanDefinition实现类
+        Spring提供了多个BeanDefinition的实现类，用于不同的场景：
+        AbstractBeanDefinition：抽象类，提供了BeanDefinition接口的基本实现。
+        GenericBeanDefinition：具体的实现类，用于通用的Bean定义。
+        RootBeanDefinition：具体的实现类，用于根Bean定义。
+        ChildBeanDefinition：具体的实现类，用于子Bean定义。
+
+
+Spring通过定义BeanDefinition来管理Spring应用中各种对象以及它们之间的相互依赖关系
+IOC容器是用来管理对象依赖关系的，对IOC容器来说，BeanDefinition就是对依赖反转模式中管理的对象依赖关系的数据抽取
+
+
+web项目通过AnnotationConfigWebApplicationContext的loadBeanDefinitions()
+    AnnotatedBeanDefinitionReader reader = this.getAnnotatedBeanDefinitionReader(beanFactory);
+    ClassPathBeanDefinitionScanner scanner = this.getClassPathBeanDefinitionScanner(beanFactory);
+Spring 容器会扫描指定的包路径，查找带有 @Configuration 注解的类。
+对于每个 @Configuration 类，Spring 会创建一个实例，并调用其中的 @Bean 方法来定义和初始化 Bean。
+并且通过@ComponentScan扫描所有@Component注解的类，完成Bean实例创建
+
+2.BeanFactory和FactoryBean的区别
+BeanFactory：
+角色：是一个通用的工厂接口，用于管理所有的Bean。
+功能：负责加载Bean定义、实例化Bean、管理Bean的生命周期等。
+使用场景：是Spring IoC容器的核心组件，用于管理所有的Bean。
+FactoryBean：
+角色：是一个特殊的Bean，本身是一个工厂(抽象工厂)，用于创建其他Bean。
+功能：通过实现FactoryBean接口，可以自定义Bean的创建逻辑。
+使用场景：用于复杂的Bean创建逻辑、动态创建Bean、创建代理Bean等。
+MyBatis通过SqlSessionFactoryBean和MapperFactoryBean等FactoryBean实现了与Spring的集成。
+    1.SqlSessionFactoryBean是Spring的FactoryBean接口的一个实现类，它负责创建MyBatis的SqlSessionFactory实例。
+    SqlSessionFactory是MyBatis的核心组件，用于创建SqlSession，而SqlSession是执行命令、获取映射器和管理事务的
+    2.MapperFactoryBean也是一个FactoryBean接口的实现类，它用于创建MyBatis的Mapper接口的代理实例。
+    这个代理实例可以被Spring容器管理，并且可以像普通的Spring Bean一样被注入到其他组件中。
+
+3.循环依赖如何解决的？
+Spring 支持 Setter 方法注入的循环依赖，通过三级缓存机制解决循环依赖问题：
+一级缓存（singletonObjects）：存储已经完全初始化的 Bean 实例。（单例池）
+二级缓存（earlySingletonObjects）：存储正在初始化的 Bean 实例。
+三级缓存（singletonFactories）：存储 Bean 的工厂方法。
+
+让我们来分析一下“A的某个field或者setter依赖了B的实例对象，同时B的某个field或者setter依赖了A的实例对象”这种循环依赖的情况。
+A首先完成了初始化的第一步，并且将自己提前曝光到singletonFactories中，
+此时进行初始化的第二步，发现自己依赖对象B，此时就尝试去get(B)，发现B还没有被create，所以走create流程，
+B在初始化第一步的时候发现自己依赖了对象A，于是尝试get(A)，
+    尝试一级缓存singletonObjects(肯定没有，因为A还没初始化完全)，
+    尝试二级缓存earlySingletonObjects（也没有），
+    尝试三级缓存singletonFactories，由于A通过ObjectFactory将自己提前曝光了，所以B能够通过ObjectFactory.getObject拿到A对象(虽然A还没有初始化完全，但是总比没有好呀)，
+    B拿到A对象后顺利完成了初始化阶段1、2、3，完全初始化之后将自己放入到一级缓存singletonObjects中。
+此时返回A中，A此时能拿到B的对象顺利完成自己的初始化阶段2、3，最终A也完成了初始化，进去了一级缓存singletonObjects中，
+而且更加幸运的是，由于B拿到了A的对象引用，所以B现在hold住的A对象完成了初始化。
+（简单来说,就是spring创造了一个 循环依赖的结束点标识）
+
+构造器注入的依赖关系是强制性的：在构造器注入中，所有依赖关系必须在对象创建时就满足。如果依赖关系未满足，对象无法被创建。
+
+4.请详细描述Spring框架Bean的生命周期包括哪些阶段？
+生命周期流程图
+容器启动 →
+    加载Bean定义 →
+        实例化 →
+            属性注入 →
+                Aware接口回调 →
+                    BeanPostProcessor前置处理 →
+                        初始化（@PostConstruct → InitializingBean → init-method） →
+                            BeanPostProcessor后置处理 →
+                                Bean就绪 →
+                                    使用 →
+                                        容器关闭 →
+                                            销毁（@PreDestroy → DisposableBean → destroy-method）
+
+    1. Bean定义加载与解析
+        BeanDefinition加载：容器读取配置文件（XML）、注解（如@Component）或Java配置类（@Configuration），
+        解析并生成BeanDefinition对象，描述Bean的元数据（类名、作用域、初始化方法等）。
+    2. Bean实例化（Instantiation）
+        实例化对象：根据BeanDefinition，通过反射调用构造函数或工厂方法创建Bean的实例。
+    3. 属性注入（Population of Properties）
+        依赖注入：容器自动注入Bean的依赖（通过Setter、构造器或字段注入）。
+    4. Aware接口回调
+        注入容器基础设施信息：若Bean实现了Aware接口，容器会回调相关方法。
+        BeanNameAware：设置Bean的ID。
+        BeanFactoryAware：注入BeanFactory实例。
+        ApplicationContextAware：注入ApplicationContext实例。
+    5. BeanPostProcessor前置处理
+        postProcessBeforeInitialization：在初始化方法（如@PostConstruct）前调用，可修改Bean实例。
+    6. 初始化（Initialization）
+        @PostConstruct注解方法：JSR-250标准，优先执行。
+        InitializingBean接口：实现afterPropertiesSet()方法。
+    7. BeanPostProcessor后置处理
+        postProcessAfterInitialization：在初始化方法后调用，常用于生成代理对象（如AOP）。
+    8. Bean就绪（Ready for Use）
+        Bean可用：此时Bean已完全初始化，可被其他对象依赖或通过容器获取。
+    9. 销毁（Destruction）
+        @PreDestroy注解方法：JSR-250标准，优先执行。
+        DisposableBean接口：实现destroy()方法。
+    10. 容器关闭与Bean销毁
+        容器关闭：调用context.close()或context.registerShutdownHook()时，触发所有单例Bean的销毁方法。
+
+
+5.讲下java中的动态代理；spring ioc是用的什么动态代理，默认用的什么；spring还用到哪些动态代理了？
+    1. JDK动态代理（基于接口）
+    原理：通过java.lang.reflect.Proxy类和InvocationHandler接口实现。
+    要求：目标类必须实现至少一个接口
+        public interface UserService {
+            void save();
+        }
+        public class UserServiceImpl implements UserService {
+            public void save() { System.out.println("保存用户"); }
+        }
+        public class JdkProxyDemo {
+            public static void main(String[] args) {
+                UserService target = new UserServiceImpl();
+                UserService proxy = (UserService) Proxy.newProxyInstance(
+                    target.getClass().getClassLoader(),
+                    target.getClass().getInterfaces(),
+                    (proxy1, method, args1) -> {
+                        System.out.println("前置增强");
+                        Object result = method.invoke(target, args1);
+                        System.out.println("后置增强");
+                        return result;
+                    }
+                );
+                proxy.save(); // 输出：前置增强 → 保存用户 → 后置增强
+            }
+        }
+    2. CGLIB动态代理（基于继承）
+    原理：通过继承目标类并重写方法实现代理，需引入cglib库。
+    要求：目标类不能是final，代理方法不能是final或static。
+        public class UserService {
+            public void save() { System.out.println("保存用户"); }
+        }
+
+        public class CglibProxyDemo {
+            public static void main(String[] args) {
+                Enhancer enhancer = new Enhancer();
+                enhancer.setSuperclass(UserService.class);
+                enhancer.setCallback((MethodInterceptor) (obj, method, args1, proxy) -> {
+                    System.out.println("前置增强");
+                    Object result = proxy.invokeSuper(obj, args1);
+                    System.out.println("后置增强");
+                    return result;
+                });
+                UserService proxy = (UserService) enhancer.create();
+                proxy.save(); // 输出：前置增强 → 保存用户 → 后置增强
+            }
+        }
+
+    JDK动态代理：基于接口，要求目标类实现接口，适用于接口编程场景。
+    CGLIB代理：基于继承，可代理无接口的类，但无法代理final类或方法。
+    Spring默认行为：优先使用JDK代理（若目标类有接口），否则使用CGLIB。Spring Boot 2.x+默认全局启用CGLIB。
+    实际应用：AOP切面、事务管理、缓存控制、配置类单例等场景均依赖动态代理。
+
+    技术	            行为	                        影响范围	                典型工具
+    CGLIB动态代理	生成新的子类字节码文件	        仅影响代理类，原始类不变	CGLIB + ASM
+    字节码增强	    直接修改原始类的字节码文件	    原始类被永久修改	        ASM、Byte Buddy
+    JDK动态代理	    生成实现接口的代理类字节码文件	仅影响代理类，原始类不变	java.lang.reflect.Proxy
