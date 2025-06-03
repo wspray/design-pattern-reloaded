@@ -1,0 +1,9 @@
+1.简述springmvc工作流程
+    SpringMVC 是一个基于 Java 的 Web 框架，用于构建 Web 应用程序。它的主要作用是将用户请求与服务器响应进行分离，使得代码结构更加清晰，便于维护和扩展。以下是 SpringMVC 的工作流程：
+    1.用户发送请求：用户通过浏览器或其他客户端工具向服务器发送 HTTP 请求。
+    2.DispatcherServlet 接收请求：SpringMVC 的前端控制器 DispatcherServlet 接收到请求后，负责对请求进行统一处理。
+    3.HandlerMapping 查找处理器：DispatcherServlet 调用 HandlerMapping 来查找能够处理该请求的处理器（Handler）。HandlerMapping 根据请求的 URL 和 HTTP 方法，查找匹配的处理器，并返回处理器的执行链。
+    4.HandlerAdapter 执行处理器：DispatcherServlet 调用 HandlerAdapter 来执行找到的处理器。HandlerAdapter 是一个适配器，用于适配不同的处理器类型，使得 DispatcherServlet 可以以统一的方式调用处理器。
+    5.处理器执行业务逻辑：处理器（通常是带有 @Controller 或 @RestController 注解的类）接收到请求后，执行相应的业务逻辑，处理请求，并返回一个 ModelAndView 对象，其中包含模型数据和视图名称。
+    6.ViewResolver 解析视图：DispatcherServlet 调用 ViewResolver 来解析 ModelAndView 中的视图名称，找到对应的视图资源（如 JSP 文件）。
+    7.DispatcherServlet 渲染视图并返回响应：DispatcherServlet 将模型数据填充到视图中，并将渲染后的结果返回给用户。

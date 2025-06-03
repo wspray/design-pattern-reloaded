@@ -38,4 +38,15 @@ public class MedianFinder {
             return maxHeap.peek();
         }
     }
+
+    public static void main(String[] args) {
+        MedianFinder mf = new MedianFinder();
+        mf.addNum(1);
+        mf.addNum(2);
+        mf.addNum(3);
+        mf.addNum(4);
+        mf.addNum(5);
+        mf.addNum(6);
+//        assertEquals(3.5, mf.findMedian(), 0.001);
+    }
 }
