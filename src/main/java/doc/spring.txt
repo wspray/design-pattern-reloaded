@@ -2,27 +2,27 @@
 BeanDefinition实际就是POJO对象在IOC容器中的抽象
 它包含了Bean的各种属性和方法，例如id（标识符）、class（类名）、scope（作用域）、ref（依赖的Bean）等
 IOC容器初始化过程中：
-    通过loadBeanDefinitions（classPath和Annotation注定义的bean）将BeanDefiniton注入到HashMap中，完成Bean定义的载入
+    通过loadBeanDefinitions（classPath和Annotation注定义的bean）将BeanDefinition注入到HashMap中，完成Bean定义的载入
     随后getBean()非Lazy注入的类中完成依赖注入
 BeanDefinition接口定义了Bean的基本属性和行为
     类名和作用域
-        getBeanClassName：获取Bean的类名。setBeanClassName：设置Bean的类名。
-        getScope：获取Bean的作用域（如singleton、prototype等）。	setScope：设置Bean的作用域。
+        getBeanClassName：获取Bean的类名                          setBeanClassName：设置Bean的类名。
+        getScope：获取Bean的作用域（如singleton、prototype等）      setScope：设置Bean的作用域。
     构造函数参数和属性值
         getConstructorArgumentValues：获取Bean的构造函数参数。
         getPropertyValues：获取Bean的属性值。
     生命周期回调方法
-        getInitMethodName：获取Bean的初始化方法名。	setInitMethodName：设置Bean的初始化方法名。
+        getInitMethodName：获取Bean的初始化方法名。	    setInitMethodName：设置Bean的初始化方法名。
         getDestroyMethodName：获取Bean的销毁方法名。	setDestroyMethodName：设置Bean的销毁方法名。
     依赖关系
-        getDependsOn：获取Bean的依赖关系。	setDependsOn：设置Bean的依赖关系。
+        getDependsOn：获取Bean的依赖关系。	            setDependsOn：设置Bean的依赖关系。
     其他属性
-        isAbstract：判断Bean是否是抽象的。	setAbstract：设置Bean是否是抽象的。
-        isLazyInit：判断Bean是否是延迟加载的。	setLazyInit：设置Bean是否是延迟加载的。
-        getAliases：获取Bean的别名。	setAliases：设置Bean的别名。
-        getDescription：获取Bean的描述信息。	setDescription：设置Bean的描述信息。
+        isAbstract：判断Bean是否是抽象的。        	    setAbstract：设置Bean是否是抽象的。
+        isLazyInit：判断Bean是否是延迟加载的。	        setLazyInit：设置Bean是否是延迟加载的。
+        getAliases：获取Bean的别名。	                setAliases：设置Bean的别名。
+        getDescription：获取Bean的描述信息。	        setDescription：设置Bean的描述信息。
         getResourceDescription：获取Bean的资源信息。	setResourceDescription：设置Bean的资源信息。
-        getOriginatingElement：获取Bean的元数据。	setOriginatingElement：设置Bean的元数据。
+        getOriginatingElement：获取Bean的元数据。	    setOriginatingElement：设置Bean的元数据。
     常见的BeanDefinition实现类
         Spring提供了多个BeanDefinition的实现类，用于不同的场景：
         AbstractBeanDefinition：抽象类，提供了BeanDefinition接口的基本实现。
@@ -44,12 +44,12 @@ Spring 容器会扫描指定的包路径，查找带有 @Configuration 注解的
 
 2.BeanFactory和FactoryBean的区别
 BeanFactory：
-角色：是一个通用的工厂接口，用于管理所有的Bean。
-功能：负责加载Bean定义、实例化Bean、管理Bean的生命周期等。
+角色：是一个通用的工厂接口，用于管理所有的Bean(工厂模式)。
+功能：负责加载Bean定义、实例化Bean、管理Bean的生命周期等  (提供getBean()方法获取Bean实例)。
 使用场景：是Spring IoC容器的核心组件，用于管理所有的Bean。
 FactoryBean：
-角色：是一个特殊的Bean，本身是一个工厂(抽象工厂)，用于创建其他Bean。
-功能：通过实现FactoryBean接口，可以自定义Bean的创建逻辑。
+角色：是一个特殊的Bean，本身是一个工厂(工厂方法模式)，用于创建其他Bean。
+功能：通过实现FactoryBean接口，可以自定义Bean的创建逻辑  (通过实现getObject()方法返回目标对象。)。
 使用场景：用于复杂的Bean创建逻辑、动态创建Bean、创建代理Bean等。
 MyBatis通过SqlSessionFactoryBean和MapperFactoryBean等FactoryBean实现了与Spring的集成。
     1.SqlSessionFactoryBean是Spring的FactoryBean接口的一个实现类，它负责创建MyBatis的SqlSessionFactory实例。
@@ -98,8 +98,9 @@ B在初始化第一步的时候发现自己依赖了对象A，于是尝试get(A)
     2. Bean实例化（Instantiation）
         实例化对象：根据BeanDefinition，通过反射调用构造函数或工厂方法创建Bean的实例。
     3. 属性注入（Population of Properties）
-        依赖注入：容器自动注入Bean的依赖（通过Setter、构造器或字段注入）。
-    4. Aware接口回调
+        依赖注入：容器自动注入Bean的依赖（通过Setter、构造器 或 字段注入）。
+    4. Aware接口回调（有些情况下，Bean需要在初始化阶段就获取这些资源，而依赖注入可能无法满足这种需求，或者在特定的生命周期阶段需要访问这些资源
+            让Bean能够 感知 到Spring容器中的某些资源或信息，通过回调方法在Bean初始化阶段注入这些资源，从而使得Bean能够在必要时与容器进行交互）
         注入容器基础设施信息：若Bean实现了Aware接口，容器会回调相关方法。
         BeanNameAware：设置Bean的ID。
         BeanFactoryAware：注入BeanFactory实例。
@@ -112,7 +113,7 @@ B在初始化第一步的时候发现自己依赖了对象A，于是尝试get(A)
     7. BeanPostProcessor后置处理
         postProcessAfterInitialization：在初始化方法后调用，常用于生成代理对象（如AOP）。
     8. Bean就绪（Ready for Use）
-        Bean可用：此时Bean已完全初始化，可被其他对象依赖或通过容器获取。
+        Bean可用：此时Bean已完全初始化，可被其他对象依赖或通过容器获取。如果bean作用域是单例，则放入单例池singletonObjects
     9. 销毁（Destruction）
         @PreDestroy注解方法：JSR-250标准，优先执行。
         DisposableBean接口：实现destroy()方法。
@@ -177,3 +178,145 @@ B在初始化第一步的时候发现自己依赖了对象A，于是尝试get(A)
     CGLIB动态代理	运行时生成新的子类字节码文件	    仅影响代理类，原始类不变	CGLIB + ASM
     字节码增强	    直接修改原始类的字节码文件	    原始类被永久修改	        ASM、Byte Buddy
     JDK动态代理	    生成实现接口的代理类字节码文件	仅影响代理类，原始类不变	java.lang.reflect.Proxy
+
+6.谈下spring ioc和aop
+    Spring IOC（控制反转）
+        1. 核心概念
+        控制反转（Inversion of Control, IOC）：将对象的创建、依赖注入和生命周期管理交给容器，而非由开发者直接控制。
+        依赖注入（Dependency Injection, DI）：IOC的实现方式，通过构造函数、Setter方法或字段注入依赖对象。
+        2. 关键组件
+        BeanFactory：基础容器，提供Bean的注册与获取。
+        ApplicationContext：扩展自BeanFactory，支持国际化、事件传播、资源加载等高级功能。
+        BeanDefinition：描述Bean的元数据（类名、作用域、初始化方法等）。
+        3. 工作流程
+        加载配置：解析XML、注解（如@Component）或Java配置类（@Configuration）。
+        实例化Bean：通过反射或工厂方法创建Bean对象。
+        依赖注入：自动装配其他Bean或配置值。
+        生命周期管理：调用初始化方法（@PostConstruct）和销毁方法（@PreDestroy）。
+    Spring AOP（面向切面编程）
+        1. 核心概念
+        切面（Aspect）：将横切关注点（如日志、事务）模块化的类。
+        连接点（Join Point）：程序执行中的某个点（如方法调用）。
+        通知（Advice）：在连接点执行的操作（如前置通知@Before、后置通知@After）。
+        切点（Pointcut）：定义哪些连接点需要被拦截（通过表达式匹配方法）。
+        目标对象（Target）：被代理的原始对象。
+        代理（Proxy）：增强后的对象，由Spring动态生成。
+        2. 实现方式
+        JDK动态代理：基于接口，要求目标类实现接口。
+        CGLIB代理：基于继承，可代理无接口的类（生成子类）。
+        3. 典型应用场景
+        事务管理（@Transactional）：自动开启、提交或回滚事务。
+        日志记录：统一记录方法调用参数和结果。
+        安全控制（@PreAuthorize）：拦截方法调用进行权限校验。
+        性能监控：统计方法执行耗时。
+        4. 工作流程
+        代理对象创建：根据目标类是否实现接口选择代理方式。
+        切点匹配：通过表达式确定需要增强的方法。
+        通知链执行：按顺序执行前置通知、目标方法、后置通知等。
+    IOC与AOP的协同
+        1. IOC为AOP提供基础设施
+        Bean管理：AOP的切面（@Aspect）本身是Spring Bean，由IOC容器实例化和管理。
+        代理生成：IOC容器在创建Bean时，根据切面配置动态生成代理对象。
+        2. AOP增强IOC管理的Bean
+        非侵入式扩展：通过代理在Bean方法前后插入逻辑，无需修改原始代码。
+        示例：声明式事务
+
+7.说下spring作用域
+    singleton：单例作用域，默认作用域，每个Spring容器中只存在一个Bean实例。适用于无状态的工具类、服务类（如Service、DAO）。
+    prototype：每次请求创建一个新的实例，适用于有状态的 Bean（如用户会话数据）。。
+    request：每个 HTTP 请求创建一个新的实例，请求结束后销毁。适用于 Web 应用中的请求级 Bean（保存请求相关的数据（如表单参数）。）。
+    session：每个 HTTP 会话创建一个新的实例，会话过期后销毁。适用于会话级 Bean（用户登录状态、购物车信息。）。
+    application：每个 ServletContext 创建一个新的实例，适用于应用级 Bean（全局配置信息）。
+    websocket：每个 WebSocket 会话创建一个新的实例，会话关闭后销毁。适用于 WebSocket 会话级 Bean（实时通信中的会话数据）。
+
+8.Spring中的单例Bean是线程安全的吗？
+    不是。所有线程共享该实例。
+    对无状态的Bean，不会有共享数据，通常像Controller，Service只是调用方法，多线程调用一个实例的方法，会在内存中复制变量，这是自己线程的工作内存，是安全的
+    对有状态的Bean，开发人员需要自己保证线程安全。
+        1. 使用prototype
+        2. 对于线程共享的数据，使用类变量或Atomic原子类，或加锁（通过synchronized或ReentrantLock控制并发访问。）
+           对于线程私有的数据，使用ThreadLocal线程副本保存私有数据。
+                （Dao操作数据库Connection，Connection是有状态的，比如数据库事务。Spring事务管理器使用ThreadLocal为不同线程维护独立的connection副本）
+9.spring是如何保证事务获取同一个Connection的
+    Spring 框架中，事务管理是通过声明式事务管理来实现的，通常使用 @Transactional 注解。
+    Spring 通过事务管理器（如 DataSourceTransactionManager）来管理事务，确保在同一个事务中获取同一个数据库连接（Connection）
+        当一个方法被标记为 @Transactional 时，Spring 事务管理器会开启一个事务。
+        事务管理器会从数据源获取一个数据库连接，并将其绑定到当前线程的事务上下文中。
+        在事务中，所有的数据库操作都会使用同一个连接。Spring 通过 TransactionSynchronizationManager 来管理事务上下文，确保在同一个事务中获取同一个连接。
+        当事务完成时，事务管理器会根据事务的状态提交connection.commit()或回滚事务connection.rollback()。
+        在提交或回滚事务后，事务管理器会从当前线程的事务上下文中移除数据库连接，并将其返回给数据源。
+            TransactionSynchronizationManager.unbindResource(dataSource) 解绑连接
+    事务传播与连接复用
+        同一事务上下文
+            在同一个事务中（如方法A调用方法B，且传播行为为PROPAGATION_REQUIRED），所有数据库操作均从ThreadLocal获取同一个Connection。
+        不同事务上下文
+            若传播行为为PROPAGATION_REQUIRES_NEW，Spring会挂起当前事务，开启新事务并绑定新Connection。
+
+10.spring有哪些设计模式
+设计模式	    Spring应用场景	                核心价值
+-----------------------------------------------------------------
+单例	        Bean默认作用域	                资源复用，性能优化
+工厂	        BeanFactory、@Bean配置	        解耦对象创建与使用
+代理	        AOP、@Transactional	            非侵入式增强功能
+模板方法	    JdbcTemplate、事务模板	        封装重复流程，提升代码复用
+观察者	    事件发布与监听	                实现松耦合的事件驱动架构
+适配器	    HandlerAdapter、AdvisorAdapter	统一接口，兼容多样化实现 HandlerAdapter:supports,handle(HttpServletRequest request, HttpServletResponse response, Object handler)
+装饰器	    HttpServletRequestWrapper	    动态扩展对象功能
+策略	        事务管理、资源加载	                灵活切换算法实现
+责任链	    HandlerInterceptor链	        分步处理请求，职责分离
+建造者	    UriComponentsBuilder、          简化复杂对象构建过程
+            BeanDefinitionBuilder
+
+11.spring事务的实现方式及隔离级别
+    1.编程式
+    2.申明式 @Transactional
+
+    1.read uncommited
+    2.read commited
+    3.repeatable read
+    4.serializable
+
+12.spring事务传播机制
+    REQUIRED
+    SUPPORTS
+    MANDATORY
+    REQUIRED_NEW
+    NOT_SUPPORTED
+    NEVER
+    NESTED
+
+13.spring事务什么时候会失效
+    1.方法不是public    @Transactional只能用于public，如果要在非public方法上，可以开启AspectJ代理模式(AspectJ是编译时增强)
+    2.异常被吃掉，事务不会回滚（或者抛出的异常不是RuntimeException）
+    3.自调用。类里面使用this调用本类的方法（this通常被省略），此时this对象不是代理类，而是对象本身实例（可以开启AspectJ代理模式解决）
+
+14.什么是bean的自动装配，有哪些方式
+    自动装配（Auto-Wiring） 是一个核心特性，它允许 Spring 容器自动注入依赖关系，从而减少显式的依赖声明。
+    自动装配通过注解或 XML 配置来实现，Spring 容器会根据指定的规则自动查找并注入依赖的 Bean
+    自动装配的方式包括字段注入、Setter 方法注入和构造器注入。
+    @Autowired  @Resource   @Qualifier
+    自定义装配：如果需要更复杂的装配逻辑，可以实现 BeanPostProcessor 或 BeanFactoryPostProcessor。
+
+15.Spring, Spring MVC, Spring Boot有什么区别
+    1. Spring是一个IOC容器，用来管理Bean，使用依赖注入实现控制反转，可以很方便的整合各种框架，提供AOP机制弥补OOP的代码重复问题，例如日志、异常
+    2. Spring MVC是Spring对Web框架的一个接见方案，提供了一个总的前端控制器DisPatcherServlet，用来接受请求，然后定义了一套路由策略及适配执行handle，返回视图
+    3. Spring Boot是基于 Spring 框架的快速开发框架，它简化了 Spring 应用的初始搭建和开发过程。Spring Boot 提供了以下功能：
+        自动配置：Spring Boot 会根据添加的依赖自动配置 Spring 和相关技术，减少了配置的复杂性。（约定了默认配置）
+        独立运行：Spring Boot 内嵌了 Tomcat、Jetty 等 Servlet 容器，无需部署 WAR 文件，可以直接运行。
+        微服务支持：Spring Boot 提供了对微服务架构的支持，通过 Spring Cloud 等项目可以轻松构建分布式系统。（整合了一系列的解决方案 starter机制）
+        监控和管理：Spring Boot 提供了对应用的监控和管理功能，通过 Actuator 可以监控应用的健康状态、指标等。
+        简化开发：Spring Boot 提供了一组默认的配置，减少了开发时的配置工作量。
+
+16.SpringMVC 的工作流程可以概括为：
+    1.用户发送请求到 DispatcherServlet。
+    2.DispatcherServlet 调用 HandlerMapping 查找处理器。
+        常见的 HandlerMapping 实现类包括：
+        RequestMappingHandlerMapping：用于处理基于注解的处理器（如 @RequestMapping）。
+        BeanNameUrlHandlerMapping：用于基于 Bean 名称的处理器映射。
+        SimpleUrlHandlerMapping：用于基于 URL 模式的处理器映射。
+    3.HandlerMapping 返回处理器的执行链。
+    4.DispatcherServlet 调用 HandlerAdapter 执行处理器。
+    5.处理器执行业务逻辑并返回 ModelAndView。
+    6.DispatcherServlet 调用 ViewResolver 解析视图。
+    7.ViewResolver 返回视图对象。
+    8.DispatcherServlet 渲染视图并返回响应给用户。
