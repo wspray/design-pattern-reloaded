@@ -122,6 +122,7 @@ java switch case中的Switch支持哪些java类型
         从 Java 12 开始(预览)，switch 语句支持任意类型，但需要使用 switch 表达式（switch-expressions）。
 
 switch原理：
+    编译器自动选择 tableswitch（密集值）或 lookupswitch（稀疏值）
     switch语句中的 case 分支条件值比较稀疏时，tableswitch指令的空间使用率偏低，这种情况下可能使用lookupswitch 指令
         执行switch时分支条件值比较稀疏时，使用tableswitch指令，会生成一张跳转表，表项数为（最大case值-最小case值＋1），
         跳转表是一个数组，数组是一段连续的内存，数组中包含了case个表项（数组索引对应值），每个都是指向对应代码块的指针。
@@ -136,4 +137,4 @@ switch原理：
 JDK17开始，引入模式匹配，绕过了这一限制，允许 switch 表达式处理任意类型的变量(在 switch 条件下传递对象，并且可以在 switch case 标签中检查该对象的不同类型。)
 在JDK 21中，Switch模式匹配采用了一种新的语法结构，允许开发者在switch语句中使用类型检查和模式匹配。
 新的语法结构使用switch关键字开始，后跟要匹配的表达式。然后，每个case分支使用箭头(->)分隔匹配模式和要执行的代码块。如果没有匹配到任何模式，可以使用default分支作为备选。
-
+性能首选 Switch：分支多（≥5）且值连续时用 Switch（跳转表 O(1)），分支少用 If-Else。
