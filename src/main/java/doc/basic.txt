@@ -1,3 +1,14 @@
+在 Java 中，数据类型分为两大类：
+    基本数据类型 和 引用数据类型。
+    enum 是 Java 中的一种特殊的数据类型，它属于 引用数据类型。
+基本数据类型：直接存储数据值，包括 byte、short、int、long、float、double、char 和 boolean。
+引用数据类型：通过引用访问数据，包括类、接口、数组和枚举。
+枚举类型：enum 是一种特殊的引用数据类型，用于定义一组常量。
+    （枚举类型本质上是一个类，继承自 java.lang.Enum。
+      单例：每个枚举常量都是唯一的实例。
+      可迭代：枚举类型可以通过 values() 方法获取所有常量的数组，因此可以进行迭代。
+      可以重载方法:  枚举类型中定义抽象方法，并在每个枚举常量中提供具体实现）
+
 Error:
     OutOfMemoryError
     StackOverFlowError
@@ -87,7 +98,42 @@ Java中的四种内部类(https://zhuanlan.zhihu.com/p/97300729)
     为了避免这些问题，Java 规定捕获的变量必须是不可变的（final 或 effectively final）。
 总结
     局部内部类、匿名内部类和 Lambda 表达式 都有类似的规则：捕获的外部变量必须是 final 或 effectively final。
+        final 变量：确保变量的值在初始化后不能被修改，从而保证线程安全。
+        effectively final 变量：虽然没有显式声明为 final，但在实际使用中没有被修改的变量。
     原因：为了避免线程安全问题和行为不可预测性，确保捕获的变量在内部类或表达式中是不可变的。
     最佳实践：在设计局部内部类时，尽量使用 final 或 effectively final 的变量，以确保代码的线程安全性和可维护性。
 
+java switch case中的Switch支持哪些java类型
+    1.基本类型
+        int：整数类型。
+        char：字符类型。
+        byte：字节类型。
+        short：短整数类型。
+    2. 包装类
+        Integer：int 的包装类。
+        Character：char 的包装类。
+        Byte：byte 的包装类。
+        Short：short 的包装类。
+    3. 枚举类型
+        enum：枚举类型。(Java 5 )
+    4. 字符串类型（Java 7 及以上版本）
+        String：字符串类型。
+    5. 其他类型(https://cloud.tencent.com/developer/article/1650819)
+        从 Java 12 开始(预览)，switch 语句支持任意类型，但需要使用 switch 表达式（switch-expressions）。
+
+switch原理：
+    switch语句中的 case 分支条件值比较稀疏时，tableswitch指令的空间使用率偏低，这种情况下可能使用lookupswitch 指令
+        执行switch时分支条件值比较稀疏时，使用tableswitch指令，会生成一张跳转表，表项数为（最大case值-最小case值＋1），
+        跳转表是一个数组，数组是一段连续的内存，数组中包含了case个表项（数组索引对应值），每个都是指向对应代码块的指针。
+        lookupswitch 和 tableswitch
+        tableswitch 使用数组数据结构，通过下标可直接定位到跳转目标行
+        lookupswitch 维护了一个key-value的关系，通过逐个比较索引来查找匹配的待跳转的行数
+        tableswitch 比 lookupswitch 查找性能更佳
+    switch 作用在枚举上实际使用了枚举的 ordinal 方法返回值作为比较的依据
+    switch 作用在字符串上时使用字符串的 hashcode 作为比较的依据，hashcode 相同时进一步使用 equals 比较字符串内容
+
+根据java虚拟机规范，java虚拟机的 tableswitch 和 lookupswitch 指令都只能支持int类型的条件值，所以 switch 不支持 long 长整型
+JDK17开始，引入模式匹配，绕过了这一限制，允许 switch 表达式处理任意类型的变量(在 switch 条件下传递对象，并且可以在 switch case 标签中检查该对象的不同类型。)
+在JDK 21中，Switch模式匹配采用了一种新的语法结构，允许开发者在switch语句中使用类型检查和模式匹配。
+新的语法结构使用switch关键字开始，后跟要匹配的表达式。然后，每个case分支使用箭头(->)分隔匹配模式和要执行的代码块。如果没有匹配到任何模式，可以使用default分支作为备选。
 
