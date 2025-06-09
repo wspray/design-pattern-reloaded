@@ -63,6 +63,7 @@ public class OuterStatic {
             System.out.println("内部的commonVariable:" + commonVariable);
             System.out.println("outerStaticVariable:"+outerStaticVariable);
             outerStaticMethod();
+//            OuterStatic.this.outerMothod(); 报错
         }
 
         /**

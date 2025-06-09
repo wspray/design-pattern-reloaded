@@ -47,7 +47,7 @@ public class Outer {
         /**
          * 成员方法，访问外部类信息（属性、方法）
          */
-        public void innerShow() {
+        private void innerShow() {
             //当和外部类冲突时，直接引用属性名，是内部类的成员属性
             System.out.println("内部的commonVariable:" + commonVariable);
             //内部类访问外部属性
@@ -59,7 +59,7 @@ public class Outer {
             System.out.println("外部的commonVariable:" + Outer.this.commonVariable);
             System.out.println("outerStaticVariable:" + outerStaticVariable);
             //访问外部类的方法
-            outerMethod();
+            Outer.this.outerMethod();
             outerStaticMethod();
         }
     }

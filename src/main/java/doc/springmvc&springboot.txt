@@ -7,3 +7,9 @@
     5.处理器执行业务逻辑：处理器（通常是带有 @Controller 或 @RestController 注解的类）接收到请求后，执行相应的业务逻辑，处理请求，并返回一个 ModelAndView 对象，其中包含模型数据和视图名称。
     6.ViewResolver 解析视图：DispatcherServlet 调用 ViewResolver 来解析 ModelAndView 中的视图名称，找到对应的视图资源（如 JSP 文件）。
     7.DispatcherServlet 渲染视图并返回响应：DispatcherServlet 将模型数据填充到视图中，并将渲染后的结果返回给用户。
+
+Spring Boot 加载优先级依次为：
+    1.命令行参数（CommandLineArgs）
+    2.Java 系统属性（SystemProperties）
+    3.环境变量（OSEnvironment）
+    4.YAML 或 Properties 文件（如 application.yml/application.properties）

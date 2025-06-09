@@ -6,7 +6,7 @@ public class ReentrantLockCondition {
     private static ReentrantLock lock = new ReentrantLock();
     private static Condition conditionA = lock.newCondition();
     private static Condition conditionB = lock.newCondition();
-    private static boolean isATurn = true;
+    private static boolean isATurn = true;//是否到A这轮了
 
     public static void main(String[] args) {
         new Thread(() -> {
