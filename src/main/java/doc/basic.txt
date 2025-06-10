@@ -9,6 +9,26 @@
       可迭代：枚举类型可以通过 values() 方法获取所有常量的数组，因此可以进行迭代。
       可以重载方法:  枚举类型中定义抽象方法，并在每个枚举常量中提供具体实现）
 
+Java中创建对象的5种方式：
+1.new关键字 （使用new关键字调用类的构造方法，JVM会为对象分配内存，并调用构造方法初始化对象。）
+2.Class.newInstance （Class类的newInstance使用的是类的public的无参构造器）
+        Person person = Person.class.newInstance();
+3.Constructor.newInstance（使用Class类的getConstructor方法获取类的构造方法。调用构造方法的newInstance方法创建对象。）
+        // 包括public的和非public的，当然也包括private的
+        Constructor<?>[] declaredConstructors = Person.class.getDeclaredConstructors();
+        Object person2 = declaredConstructors[1].newInstance("fsx", 18);
+        // 只返回public的~~~~~~(返回结果是上面的子集)
+        Constructor<?>[] constructors = Person.class.getConstructors();
+4.Clone方法
+        public class Person implements Cloneable {
+        Person person = new Person("fsx", 18);
+        Object clone = person.clone();
+5.反序列化
+        byte[] bytes = SerializationUtils.serialize(person);
+        // 字节数组：可以来自网络、可以来自文件（本处直接本地模拟）
+        Object deserPerson = SerializationUtils.deserialize(bytes);
+
+
 Error:
     OutOfMemoryError
     StackOverFlowError

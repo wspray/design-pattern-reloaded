@@ -122,6 +122,8 @@ B在初始化第一步的时候发现自己依赖了对象A，于是尝试get(A)
 
 
 5.讲下java中的动态代理；spring ioc是用的什么动态代理，默认用的什么；spring还用到哪些动态代理了？
+    JDK 动态代理只能代理实现了接口的类或者直接代理接口，而 CGLIB 可以代理未实现任何接口的类。
+
     1. JDK动态代理（基于接口）
     原理：通过java.lang.reflect.Proxy类和InvocationHandler接口实现。
     要求：目标类必须实现至少一个接口
@@ -137,7 +139,9 @@ B在初始化第一步的时候发现自己依赖了对象A，于是尝试get(A)
                 UserService proxy = (UserService) Proxy.newProxyInstance(
                     target.getClass().getClassLoader(),
                     target.getClass().getInterfaces(),
-                    (proxy1, method, args1) -> {
+                    (proxy1, method, args1) -> {            //class LogProxy implements InvocationHandler
+                                                            //@Override
+                                                            //public Object invoke(Object proxy, Method method, Object[] args) throws Throwable
                         System.out.println("前置增强");
                         Object result = method.invoke(target, args1);
                         System.out.println("后置增强");
@@ -159,6 +163,9 @@ B在初始化第一步的时候发现自己依赖了对象A，于是尝试get(A)
                 Enhancer enhancer = new Enhancer();
                 enhancer.setSuperclass(UserService.class);
                 enhancer.setCallback((MethodInterceptor) (obj, method, args1, proxy) -> {
+                                    //class TimeMethodInterceptor implements MethodInterceptor{
+                                    //@Override
+                                    //public Object intercept(Object o, Method method, Object[] objects, MethodProxy methodProxy) throws Throwable {
                     System.out.println("前置增强");
                     Object result = proxy.invokeSuper(obj, args1);
                     System.out.println("后置增强");
