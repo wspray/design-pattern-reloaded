@@ -1,6 +1,6 @@
 package handWrite.mini_spring.web;
 
-import tech.insight.spring.Component;
+import handWrite.mini_spring.Component;
 
 /**
  * @author gongxuanzhangmelt@gmail.com

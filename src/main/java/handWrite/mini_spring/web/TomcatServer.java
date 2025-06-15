@@ -4,9 +4,9 @@ import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.startup.Tomcat;
 import org.slf4j.bridge.SLF4JBridgeHandler;
-import tech.insight.spring.Autowired;
-import tech.insight.spring.Component;
-import tech.insight.spring.PostConstruct;
+import handWrite.mini_spring.Autowired;
+import handWrite.mini_spring.Component;
+import handWrite.mini_spring.PostConstruct;
 
 import java.io.File;
 import java.util.logging.LogManager;

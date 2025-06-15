@@ -5,8 +5,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import tech.insight.spring.BeanPostProcessor;
-import tech.insight.spring.Component;
+import handWrite.mini_spring.BeanPostProcessor;
+import handWrite.mini_spring.Component;
 
 import java.io.IOException;
 import java.io.InputStream;
