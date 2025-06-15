@@ -229,6 +229,10 @@ B在初始化第一步的时候发现自己依赖了对象A，于是尝试get(A)
         示例：声明式事务
 
 7.说下spring作用域
+    例：
+    @Bean
+    @Scope("prototype") // 原型作用域
+
     singleton：单例作用域，默认作用域，每个Spring容器中只存在一个Bean实例。适用于无状态的工具类、服务类（如Service、DAO）。
     prototype：每次请求创建一个新的实例，适用于有状态的 Bean（如用户会话数据）。。
     request：每个 HTTP 请求创建一个新的实例，请求结束后销毁。适用于 Web 应用中的请求级 Bean（保存请求相关的数据（如表单参数）。）。
@@ -327,3 +331,13 @@ B在初始化第一步的时候发现自己依赖了对象A，于是尝试get(A)
     6.DispatcherServlet 调用 ViewResolver 解析视图。
     7.ViewResolver 返回视图对象。
     8.DispatcherServlet 渲染视图并返回响应给用户。
+
+17.Spring 提供了多种注解用于依赖注入，每种注解都有其特定的用途和适用场景：
+@Autowired：最常用的依赖注入注解，支持按类型或名称查找。
+@Inject：Java 标准注解，功能与 @Autowired 类似。
+@Resource：Java 标准注解，优先按名称查找，其次按类型查找。
+@Value：用于注入配置文件中的值或表达式结果。
+@Qualifier：用于在多个相同类型的 Bean 中指定注入哪一个。
+@Primary：用于在多个相同类型的 Bean 中指定优先注入哪一个。
+@Lookup：用于注入原型作用域的 Bean。
+根据实际需求选择合适的注解，可以更好地管理 Spring 应用中的依赖关系。
