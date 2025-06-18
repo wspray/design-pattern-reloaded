@@ -5,9 +5,66 @@ Java垃圾回收（GC）机制详解：https://www.cnblogs.com/xiaoxi/p/6486852.
 当一个对象到GC Roots没有任何引用链（即GC Roots到对象不可达）时，则证明此对象是不可用的。
 可以作为GCRoots的对象包括下面几种：
 (1). 虚拟机栈（栈帧中的局部变量区，也叫做局部变量表）中引用的对象。
-(2). 方法区中的类静态属性引用的对象。
-(3). 方法区中常量引用的对象。
-(4). 本地方法栈中JNI(Native方法)引用的对象。
+    void runningMethod() {
+        Object localObj = new Object();  // GC Root (局部变量)
+        String param = "param";          // GC Root (参数)
+    }
+(2). 方法区中的 静态变量引用的对象。Static Variables
+        static Object staticObj = new Object(); // GC Root
+        static List<String> cache = new ArrayList<>(); // GC Root
+(3). 方法区中的 常量池中的对象（Run-Time Constant Pool）
+        static final String NAME = "Java"; // "Java" 字符串是 GC Root
+        static final Object EMPTY = new Object(); //  GC Root
+(4). 本地方法栈中JNI(Native方法)引用的对象。 // C++ 代码中创建的全局引用
+(5). 存活线程对象（Live Threads）未终止的线程（Thread 实例）
+(6). 同步锁对象（Monitor Locked Objects）避免锁回收后导致同步失效
+        Object lock = new Object();
+        synchronized(lock) { // lock 成为 GC Root
+(7). JVM 系统对象，例如ClassLoader（JVM System Objects）
+(8). ThreadLocal 的 Entry 对象
+        线程存活时，其 ThreadLocalMap 中的 Entry 是 GC Root
+(9). finalize() 队列中的对象
+        等待执行 finalize() 的对象被 JVM 临时标记为根
+(10). 类元数据对象
+        Class 对象、方法字节码等（除非类被卸载）
+(11). 内存映射缓冲区（MappedByteBuffer）
+        被操作系统页面缓存引用的缓冲区
+
+排查内存泄漏的关键点
+    当发生内存泄漏时，通过 堆转储（Heap Dump） 分析：
+    1.使用 MAT（Memory Analyzer Tool） 或 VisualVM
+    2.查找 GC Roots 引用链 → 定位非预期存活的根对象
+    3.重点关注：
+        静态集合类（如 static Map）
+        未关闭的线程池
+        未清理的 ThreadLocal
+        缓存未设置过期策略
+    📌 示例：static Map<UserId, User> cache = new HashMap<>() 会导致所有 User 对象无法回收，直到类卸载。
+
+判断对象是否可以被回收只有一个条件：对象的外部不存在任何强引用持有。（GC ROOT是否可达）
+这里面试官一般就会问你 是否知道几种引用类型，要能回答强弱软虚四种及其含义：
+    引用类型	    GC 回收条件	            是否影响 GC	    典型应用场景      特点                                             回收条件补充报告
+    强引用	    从不回收（除非无引用链）	❌ 不干扰	    日常对象创建      只要存在强引用链，GC 永不回收对象。                   对象到 GC Roots 无任何强引用路径
+    软引用	    内存不足时回收	        ✅ 辅助	        内存敏感缓存      内存充足时保留对象，内存不足时（OOM 前）自动回收        内存不足 && 无强引用
+    弱引用	    下次 GC 必回收	        ✅ 辅助	        临时缓存、监听器   无论内存是否充足，下次 GC 必回收,比软引用更短的生命周期  无强引用 → 下次 GC 立即回收
+    虚引用	    对象回收时收到通知	        ✅ 辅助	        精准内存回收跟踪   最弱的引用，无法通过它获取对象（get() 永远返回 null）  无强/软/弱引用 → GC 回收后通知队列
+1.byte[] data = new byte[1024 * 1024]; // 只要存在强引用链，GC 永不回收对象
+2.Map<String, SoftReference<Bitmap>> imageCache = new HashMap<>();
+// 读取缓存
+Bitmap bitmap = imageCache.get(key).get();
+if (bitmap == null) {
+    bitmap = loadFromDisk(key); // 重新加载
+    imageCache.put(key, new SoftReference<>(bitmap));
+}
+3.Map<Key, Value> cache = new WeakHashMap<>();（键弱引用）
+ThreadLocal 防内存泄漏
+    static class ThreadLocalMap {
+        static class Entry extends WeakReference<ThreadLocal<?>> {
+            Object value;
+        }
+    }
+4.ReferenceQueue<Object> queue = new ReferenceQueue<>();
+PhantomReference<Object> phantomRef = new PhantomReference<>(new Object(), queue);//虚引用
 
 方法区的垃圾回收
 方法区的垃圾回收主要回收两部分内容：1. 废弃常量。2. 无用的类。
@@ -91,6 +148,39 @@ join()执行后进入阻塞状态，B线程调用A线程的join()方法，B进�
 
 需要注意的是，在等待方执行的逻辑中，一定要用while循环来判断等待条件，因为执行notify/notifyAll方法时只是让等待线程从wait方法返回，而非重新进入临界区
 
+------------------------------------------------------------------------------------------------------------------------------------
+ThreadPoolExecutor 在提交一个新任务（execute(Runnable command) 方法）时内部执行的三步决策流程，核心目标是高效且安全地分配任务
+第一步：尝试创建核心线程执行任务
+第二步：尝试将任务加入队列
+第三步：尝试创建非核心线程执行任务
+流程总结
+    条件	                动作      	                                  失败处理
+1	工作线程 < 核心线程数	创建核心线程执行任务                             进入步骤2
+2	任务成功入队	        二次检查状态(池已关闭?)                          移除任务并拒绝
+                        和线程数(池仍运行但无工作线程 (workerCount == 0))  创建非核心线程(这是一种特殊情况:allowCoreThreadTimeOut=true，设置了核心线程空闲超时后退出)
+3	队列已满	            创建非核心线程执行任务	                          拒绝任务
+
+关键设计思想
+资源分级利用：优先用核心线程 > 队列缓冲 > 非核心线程，避免过度创建线程。
+状态安全：通过原子操作 (addWorker) 和二次检查确保线程池状态一致性。
+健壮性：处理瞬时状态变化（如线程死亡、池突然关闭）。
+keepAliveTime 是 Java 线程池（ThreadPoolExecutor）中一个关键的性能调优参数，它决定了 非核心线程空闲时的存活时间（没有新任务加入到worker）。
+
+函数中创建的线程池会被GC回收吗？
+GC Root: Thread（通过 ThreadFactory 创建）   ->  Worker  ->  线程池ThreadPoolExecutor
+创建的任务会在线程池中new Worker(),
+    1.它是一个线程池的内部类,持有线程池对象的引用,
+    2.Worker 线程阻塞在 getTask() 等待新任务（如 workQueue.take()），线程不会退出。
+ 调用 shutdown() 后
+回收流程：
+    1.中断空闲线程：
+        shutdown() 会中断所有阻塞在 getTask() 的 Worker 线程（通过 Thread.interrupt()）。
+    2.Worker 线程退出：
+        被中断的 Worker 会跳出循环，执行 processWorkerExit() 清理资源。
+    3.断开引用链：
+        Worker 线程结束运行，不再是 GC Root。
+        Worker 对象被移出线程池的 workers 集合（HashSet<Worker>）。
+        Worker 对线程池的引用断开。
 ------------------------------------------------------------------------------------------------------------------------------------
 在Java中，堆（Heap）和栈（Stack）是两种非常重要的内存区域
 1. 栈（Stack）
