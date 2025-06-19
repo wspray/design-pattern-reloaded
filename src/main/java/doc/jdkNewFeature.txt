@@ -1,0 +1,25 @@
+导出语句（exports），导出模块，其他模块访问。
+开放语句（opens），开放当前模块，其他模块可以访问，包括反射调用等。
+需要语句（requires），声明模块对另一个模块的依赖关系。
+使用语句（uses），表达服务消费。
+提供语句（provides），表达服务提供。
+
+jdk9: https://blog.csdn.net/u012060033/article/details/103155329
+在JDK8中，public类型意味着程序的所有部分都可以访问它，在JDK9中，public类型可能不是对每个类都公开的，模块中定义的public类型可能分为3类：
+仅在定义模块内公开：如果一个类型在模块中被定义为public，但是该模块不导出包含该类型的包，则该类型仅在该模块中是公开的，没有其他模块而已访问类型；
+只针对特定模块公开：如果一个类型在一个模块中被定义为public，但是该模块使用一个限定的export来导出包含该类型的包，该类型将只能在有限导出的子句中指定的模块中访问；
+指定所有类公开：如果一个类型在模块中被定义为public，但该模块使用包含该类型的非限定的导出语句导出该包，该类型将公开给读取第一个模块的每个模块。
+
+ 模块化JAR中的模块
+当JAR包含模块的编译代码时，JAR称为模块化JAR。模块化JAR在根目录下包含一个module-info.class文件。
+无论在JDk9之前使用JAR，现在都可以使用模块化JAR。模块化JAR可以放置在类路径上，在这种情况下，模块化JAR中的module-info.class文件将被忽略，因为module-info中不是有效的类名。
+
+MOD文件中的模块
+JDK9引入了一种称为JMOD的新格式来封装模块。JMOD文件使用.jmod扩展名。JDK模块被编译成JMOD格式，放在JDK_HOME/jmods目录中。
+例如，可以找到一个包含java.base模块内容的java.base.jmod文件。仅在编译时和链接时才支持JMOD文件。它们在运行时不受支持。
+
+使用javac命令编译远点并将编译的代码保存在mods目录下。
+javac -d mods --module-source-path src src\com.jdk.m\module-info.java src\com.jdk.m\Welcome.java
+打包模块代码
+jar --create --file lib\com.jdk.m-1.0.jar --main-class com.jdk.m.Welcome --module-version 1.0 -C mods/com.jdk.m .
+
