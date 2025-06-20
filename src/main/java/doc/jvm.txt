@@ -45,7 +45,7 @@ Java垃圾回收（GC）机制详解：https://www.cnblogs.com/xiaoxi/p/6486852.
 这里面试官一般就会问你 是否知道几种引用类型，要能回答强弱软虚四种及其含义：
     引用类型	    GC 回收条件	            是否影响 GC	    典型应用场景      特点                                             回收条件补充报告
     强引用	    从不回收（除非无引用链）	❌ 不干扰	    日常对象创建      只要存在强引用链，GC 永不回收对象。                   对象到 GC Roots 无任何强引用路径
-    软引用	    内存不足时回收	        ✅ 辅助	        内存敏感缓存      内存充足时保留对象，内存不足时（OOM 前）自动回收        内存不足 && 无强引用
+    软引用	    内存不足时回收	            ✅ 辅助	        内存敏感缓存      内存充足时保留对象，内存不足时（OOM 前）自动回收        内存不足 && 无强引用
     弱引用	    下次 GC 必回收	        ✅ 辅助	        临时缓存、监听器   无论内存是否充足，下次 GC 必回收,比软引用更短的生命周期  无强引用 → 下次 GC 立即回收
     虚引用	    对象回收时收到通知	        ✅ 辅助	        精准内存回收跟踪   最弱的引用，无法通过它获取对象（get() 永远返回 null）  无强/软/弱引用 → GC 回收后通知队列
 1.byte[] data = new byte[1024 * 1024]; // 只要存在强引用链，GC 永不回收对象
@@ -65,6 +65,15 @@ ThreadLocal 防内存泄漏
     }
 4.ReferenceQueue<Object> queue = new ReferenceQueue<>();
 PhantomReference<Object> phantomRef = new PhantomReference<>(new Object(), queue);//虚引用
+
+
+当 ThreadLocal 导致内存泄漏时，其 GC Root 链通常是这样的：
+Thread Ref -> Thread -> ThreadLocalMap -> Entry -> value
+1.ThreadLocalMap 的生命周期与线程的生命周期一致。如果线程不结束，ThreadLocalMap 就会一直存在。
+2.当 ThreadLocal 的实例被垃圾回收时（由于没有外部强引用），其对应的 key 在 Entry 中会变成 null。而 value 由于是强引用，仍然被 ThreadLocalMap 持有。
+3.如果线程一直不结束，这些 value 就会一直存在，无法被垃圾回收器回收，从而导致内存泄漏。
+
+
 
 方法区的垃圾回收
 方法区的垃圾回收主要回收两部分内容：1. 废弃常量。2. 无用的类。

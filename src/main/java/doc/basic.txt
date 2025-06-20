@@ -77,10 +77,18 @@ Exception:
     定义：在子类中重新定义父类的方法，方法名、参数列表和返回类型必须完全相同。
     参数列表相同：方法名、参数列表和返回类型必须与父类中的方法完全一致。
     作用：允许子类提供特定的实现，覆盖父类的默认行为。
+重载：发生在同一类中，方法名相同，参数列表不同。
+重写：发生在父子类中，方法名相同，参数列表相同。
+	两同：①方法名相同
+	     ②参数列表相同
+	两小：①子类返回值类型小于等于父类返回值类型（返回值为基本数据类型时，必须相等）
+	     ②子类抛出的异常小于等于父类抛出的异常
+	一大：子类访问控制修饰符大于等于父类访问控制修饰符
+
 
 集合类存放于 Java.util 包中，主要由Collection和Map
-Collection：Collection 是集合 List、Set、Queue 的最基本的接口
-Map：是映射表的基础接口：HashMap,TreeMap,HashTable
+Collection：Collection 是集合 List、Set、Queue 的最基本的接口   存放单一元素
+Map：是映射表的基础接口：HashMap,TreeMap,HashTable             存放键值对
 
 特性	            Set	                                            List
 元素是否可重复	    不允许重复元素	                                    允许元素重复
@@ -166,4 +174,51 @@ JDK17开始，引入模式匹配，绕过了这一限制，允许 switch 表达�
 在JDK 21中，Switch模式匹配采用了一种新的语法结构，允许开发者在switch语句中使用类型检查和模式匹配。
 新的语法结构使用switch关键字开始，后跟要匹配的表达式。然后，每个case分支使用箭头(->)分隔匹配模式和要执行的代码块。如果没有匹配到任何模式，可以使用default分支作为备选。
 性能首选 Switch：分支多（≥5）且值连续时用 Switch（跳转表 O(1)），分支少用 If-Else。(在 10 个分支的测试中，Switch 比 If-Else 快 2-3 倍（JMH 基准测试）)
+
+泛型的存在意义不仅仅是编译时的类型检查，虽然这是它最重要的功能之一。
+泛型的引入为 Java 语言带来了更多的类型安全性和灵活性，同时也提高了代码的可读性和可维护性。
+以下是泛型的多个重要功能和意义：
+    1. 编译时类型检查
+        这是泛型最核心的功能之一。通过泛型，编译器可以在编译阶段检查类型的安全性，从而避免运行时的 ClassCastException 等类型转换错误。
+                List<String> list = new ArrayList<>();
+                list.add("Hello");
+                // list.add(123); // 编译错误：类型不匹配
+        在这个例子中，List<String> 确保了列表中只能存储 String 类型的对象。尝试添加其他类型的对象会导致编译错误，而不是运行时错误。
+    2. 消除类型转换
+        在没有泛型的情况下，从集合中取出对象时通常需要手动进行类型转换。泛型可以自动处理这些类型转换，从而减少代码的繁琐性和出错的可能性。
+                for (String item : list) {
+                    System.out.println(item);
+                }
+                List rawList = new ArrayList();
+                for (Object item : rawList) {
+                    String str = (String) item; // 手动类型转换
+                }
+        在这个例子中，使用泛型的 List<String> 不需要手动类型转换，而原生的 List 则需要手动转换。
+    3. 代码复用性
+        泛型允许开发者编写通用的代码，这些代码可以适用于多种类型，而不需要为每种类型编写单独的代码。这大大提高了代码的复用性。
+        public class ResponseResult<T> {
+                         private String code;
+                         private String message;
+                         private T data;
+                         private Boolean success;
+        在这个例子中，ResponseResult<T> 是一个泛型类，可以用于存储任何类型的对象，而不需要为每种类型单独编写一个类。
+    4. 提高代码可读性
+        泛型通过明确指定类型，使得代码更加清晰易懂。读者可以更容易地理解代码的意图，而不需要猜测类型转换的意图。
+        在这个例子中，List<String> 明确表示这是一个存储字符串的列表，而原生的 List 则没有明确的类型信息。
+    5. 类型推断
+    Java 编译器可以自动推断泛型参数的具体类型，这使得代码更加简洁。从 Java 7 的钻石操作符（<>）到 Java 10 的局部变量类型推断（var），Java 不断增强了类型推断的能力。
+            // Java 7 的钻石操作符
+            List<String> list = new ArrayList<>();
+            // Java 10 的局部变量类型推断
+            var anotherList = new ArrayList<String>();
+    在这个例子中，List<String> list = new ArrayList<>() 使用了钻石操作符，而 var anotherList = new ArrayList<String>() 使用了局部变量类型推断。
+    6. 性能优化
+    虽然泛型本身 不会 直接提高运行时性能，但它可以通过 减少 运行时的 类型检查 和 类型转换 来间接提高性能。此外，泛型还可以帮助开发者编写更高效的代码。
+
+SPI 即 Service Provider Interface ，字面意思就是：“服务提供者的接口”，我的理解是：专门提供给服务提供者或者扩展框架功能的开发者去使用的一个接口。
+SPI 将服务接口和具体的服务实现分离开来，将服务调用方和服务实现者解耦，能够提升程序的扩展性、可维护性。修改或者替换服务实现并不需要修改调用方。
+很多框架都使用了 Java 的 SPI 机制，比如：Spring 框架、数据库加载驱动、日志接口、以及 Dubbo 的扩展实现等等。
+API（Application Programming Interface）
+当实现方提供了接口和实现，这就是 API。这种情况下，接口和实现都是放在实现方的包中。
+当接口存在于调用方这边时，这就是 SPI 。由接口调用方确定接口规则，然后由不同的厂商根据这个规则对这个接口进行实现，从而提供服务。
 
