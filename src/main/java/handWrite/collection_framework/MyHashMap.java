@@ -99,7 +99,6 @@ public class MyHashMap<K, V> {
             }
         }
         this.table = newTable;
-//        12
         System.out.println("扩容了，扩容到" + this.table.length);
     }
 
