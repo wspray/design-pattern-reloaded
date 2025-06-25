@@ -1,0 +1,70 @@
+Postgresql VS Mysql
+1.PostgreSQL采用的是多进程架构，PostgreSQL启动时会创建一个主进程（postmaster），它负责监听客户端的连接请求，并根据请求创建新的子进程来处理具体的数据库操作。
+    每个子进程独立处理用户的请求，保证了数据操作的隔离性和稳定性
+    PostgreSQL 使用共享内存来存储一些全局数据结构，如共享缓冲区（shared buffers）。所有子进程都可以访问共享缓冲区，这有助于减少磁盘 I/O 操作。
+2.用postgre取代一切。取代几乎所有的后端数据
+    数据缓存：UNLOGGED关键词
+        CREATE UNLOGGED TABLE cache (
+        id serial PRIMARY KEY,
+        key text UNIQUE NOT NULL,
+        value jsonb,
+        inserted_at timestamp);
+        CREATE INDEX idx_cache_key ON cache (key);
+        在PostgreSQL中可以通过创建一个定期删除旧行的存储过程
+    Postgres 作为cron在特定时间执行操作，例如发送邮件，并使用pg_cron将事件添加到消息队列。
+    消息队列使用Postgres的SKIP LOCKED来是先，而不用Kafka。或者可以用Golang的River作业队列。
+    作业调度.pg_cron
+        With job
+    发布/订阅
+    OLAP: pg_analytics
+    Postgres使用带有JSONB将Json文档存储在数据库中，对它们进行搜索和索引，而不用Mongo。
+        支持JSON 列类型，可以创建一个“GIN”（通用倒排索引）索引来索引JSONB对象中的所有属性
+    使用Postgres代替Elastic进行全文搜索。
+3.postgresql特有的数据类型
+    1.xml
+    2.jsonb
+    3.数组
+    4.复合类型表示一行或者一条记录的结构；
+
+OLAP分析
+    1. 聚合查询
+        SELECT
+            department,
+            SUM(salary) AS total_salary
+        FROM
+            employees
+        GROUP BY
+            department;
+    2. 时间序列分析 DATE_TRUNC
+        SELECT
+            DATE_TRUNC('month', order_date) AS month,
+            COUNT(order_id) AS total_orders
+        FROM
+            orders
+        GROUP BY
+            DATE_TRUNC('month', order_date)
+        ORDER BY
+            month;
+    3.同比分析 LAG
+        SELECT
+            DATE_TRUNC('month', order_date) AS month,
+            SUM(revenue) AS revenue,
+            LAG(SUM(revenue)) OVER (ORDER BY DATE_TRUNC('month', order_date)) AS previous_month_revenue,
+            (SUM(revenue) - LAG(SUM(revenue)) OVER (ORDER BY DATE_TRUNC('month', order_date))) / LAG(SUM(revenue)) OVER (ORDER BY DATE_TRUNC('month', order_date)) * 100 AS revenue_growth_percent
+        FROM
+            orders
+        GROUP BY
+            DATE_TRUNC('month', order_date)
+        ORDER BY
+            month;
+    5. 排名分析 RANK
+        SELECT
+            product_id,
+            product_name,
+            SUM(sales_quantity) AS total_sales,
+            RANK() OVER (ORDER BY SUM(sales_quantity) DESC) AS sales_rank
+        FROM
+            sales
+        GROUP BY
+            product_id,
+            product_name;

@@ -8,9 +8,46 @@
     6.ViewResolver 解析视图：DispatcherServlet 调用 ViewResolver 来解析 ModelAndView 中的视图名称，找到对应的视图资源（如 JSP 文件）。
     7.DispatcherServlet 渲染视图并返回响应：DispatcherServlet 将模型数据填充到视图中，并将渲染后的结果返回给用户。
 
-Spring Boot 加载优先级依次为：
+2.Spring Boot 加载优先级依次为：
     1.命令行参数（CommandLineArgs）    java -jar xx.jar --server.port=8081
     2.Java 系统属性（SystemProperties） java -jar -Dserver.port=8079 myapp.jar
     3.环境变量（OSEnvironment）
-    4.YAML 或 Properties 文件（如 application.yml/application.properties）
+    4.Profile 专属配置（application-{profile}.properties）。
+    5.项目内 application.properties/application.yml。
+        YAML 或 Properties 文件（如 application.yml/application.properties）
         Bootstrap.properties > bootstrap.yml > application.properties > application.yml
+    6.@PropertySource
+        注解用于在Spring Boot的@Configuration类上加载外部属性文件
+
+3.Spring Boot自动装配
+    简单总结:
+        在项目启动的时候，Spring Boot框架会自动读取
+        META-INF/spring.factories配置文件中org.springframework.boot.autoconfigure.EnableAutoConfiguration所配置的配置类，
+        然后将其中所定义的bean根据条件注解所指定的条件来决定是否需要将其导入到Spring容器中生成相应的Bean对象。
+        通过条件化加载避免冗余配置，确保“依赖即服务”（如引入 spring-boot-starter-web 自动配置 Tomcat + Spring MVC）。
+    详细总结:
+        在Spring Boot项目中有一个注解@SpringBootApplication，这个注解是对三个注解进行了封装：
+                    @SpringBootConfiguration、@EnableAutoConfiguration、@ComponentScan
+        @EnableAutoConfiguration是实现自动化配置的核心注解。
+            该注解通过@Import注解导入AutoConfigurationImportSelector，这个类实现了一个导入器接口ImportSelector。
+            在该接口中存在一个方法selectImports，该方法的返回值是一个数组，数组中存储的就是要被导入到spring容器中的类的全类名。
+            * AutoConfigurationImportSelector 类中重写了这个方法,
+            该方法内部就是读取了项目的classpath路径下META-INF/spring.factories文件中的所配置的类的全类名。
+            在这些配置类中所定义的Bean会根据条件注解所指定的条件来决定是否需要将其导入到Spring容器中。（如无 Redis 依赖时跳过 RedisAutoConfiguration）
+        @ComponentScan : 配置扫描路径，用于加载使用注解格式定义的bean
+        @SpringBootConfiguration : 标注在某个类上，表示这是一个Spring Boot的配置类；
+
+4.Spring Boot Starter场景启动器
+    spring-boot-starter-web   ->   spring-boot-starter   ->   spring-boot-autoconfigure
+    1.官方内置配置:Spring Boot官方内置配置功能都在 spring-boot-autoconfigure 包里面,Spring Boot 自动装配会通过引入了哪些场景这个场景的自动配置才会开启生效
+        例如：
+            Spring MVC中最重要的控制器(dispatcherServlet)也配置好了
+            文件上传解析器配置multipartResolver
+            字符集配置HttpEncodingConfiguration  CharacterEncodingFilter
+                使用 ContentCachingRequestWrapper 和 ContentCachingResponseWrapper 来重复读取请求体和响应体，以记录完整的请求响应日志
+    2.第三方 Starter 的配置
+        mybatis-spring-boot-starter 包含 MybatisAutoConfiguration
+        spring-boot-starter-data-redis 包含 RedisAutoConfiguration
+        这些配置通过其 Starter 内的 META-INF/spring.factories 文件注册。
+    3.用户自定义配置
+        自定义AutoConfiguration类，再写将类的全限定名写到META-INF/spring.factories 文件注册。
