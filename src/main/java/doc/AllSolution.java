@@ -27,6 +27,11 @@ class AllSolution {
         ListNode(int val) {
             this.val = val;
         }
+
+        ListNode(int val, ListNode next) {
+            this.val = val;
+            this.next = next;
+        }
     }
 
     public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
@@ -88,6 +93,26 @@ class AllSolution {
         return answer;
     }
 
+    // 206. 反转链表
+    public ListNode reverseList(ListNode head) {
+        ListNode node = null;
+        while (head != null) {
+            ListNode temp = head.next;
+            head.next = node;
+            node = head;
+            head = temp;
+        }
+        return node;
+    }
+//    public static void main(String[] args) {
+//        ListNode listNode = new ListNode(1,new ListNode(2,new ListNode(3)));
+//        ListNode result = new AllSolution().reverseList(listNode);
+//        while (result!=null) {
+//            System.out.println(result.val);
+//            result = result.next;
+//        }
+//    }
+
     // 1768. 交替合并字符串
     public String mergeAlternately(String word1, String word2) {
         StringBuilder result = new StringBuilder();
@@ -133,8 +158,8 @@ class AllSolution {
     // 649. Dota2参议院
     public String predictPartyVictory(String senate) {
         int n = senate.length();
-        Queue<Integer> radiant = new LinkedList<Integer>();
-        Queue<Integer> dire = new LinkedList<Integer>();
+        Queue<Integer> radiant = new LinkedList<>();
+        Queue<Integer> dire = new LinkedList<>();
         for (int i = 0; i < n; ++i) {
             if (senate.charAt(i) == 'R') {
                 radiant.offer(i);
@@ -152,4 +177,7 @@ class AllSolution {
         }
         return !radiant.isEmpty() ? "Radiant" : "Dire";
     }
+//    public static void main(String[] args) {
+//        System.out.println(new AllSolution().predictPartyVictory("RDD"));
+//    }
 }
