@@ -1,9 +1,6 @@
 package doc;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 class AllSolution {
     //    1.两数之和
@@ -99,15 +96,15 @@ class AllSolution {
         boolean big = length1 > length2;
         int t = Math.max(length1, length2);
         int diff = Math.abs(length1 - length2);
-        int a=0,b=0;
+        int a = 0, b = 0;
         for (int i = 0; i < t; i++) {
-            if (a==b && a<length1 && b<length2) {
+            if (a == b && a < length1 && b < length2) {
                 result.append(word1.charAt(i)).append(word2.charAt(i));
             } else if (big) {
-                result.append(word1, length1-diff, length1);
+                result.append(word1, length1 - diff, length1);
                 break;
             } else {
-                result.append(word2, length2-diff, length2);
+                result.append(word2, length2 - diff, length2);
                 break;
             }
             a++;
@@ -115,6 +112,7 @@ class AllSolution {
         }
         return result.toString();
     }
+
     public static String mergeAlternately2(String word1, String word2) {
         StringBuilder merged = new StringBuilder();
         int i = 0, j = 0;
@@ -128,8 +126,30 @@ class AllSolution {
         }
         return merged.toString();
     }
+//    public static void main(String[] args) {
+//        System.out.println(new AllSolution().mergeAlternately("abcd", "pq"));
+//    }
 
-    public static void main(String[] args) {
-        System.out.println(new AllSolution().mergeAlternately("abcd", "pq"));
+    // 649. Dota2参议院
+    public String predictPartyVictory(String senate) {
+        int n = senate.length();
+        Queue<Integer> radiant = new LinkedList<Integer>();
+        Queue<Integer> dire = new LinkedList<Integer>();
+        for (int i = 0; i < n; ++i) {
+            if (senate.charAt(i) == 'R') {
+                radiant.offer(i);
+            } else {
+                dire.offer(i);
+            }
+        }
+        while (!radiant.isEmpty() && !dire.isEmpty()) {
+            int radiantIndex = radiant.poll(), direIndex = dire.poll();
+            if (radiantIndex < direIndex) {
+                radiant.offer(radiantIndex + n);
+            } else {
+                dire.offer(direIndex + n);
+            }
+        }
+        return !radiant.isEmpty() ? "Radiant" : "Dire";
     }
 }
