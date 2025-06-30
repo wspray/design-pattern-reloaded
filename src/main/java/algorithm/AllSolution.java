@@ -1,19 +1,8 @@
 package algorithm;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 class AllSolution {
     //    1.两数之和
@@ -142,7 +131,7 @@ class AllSolution {
         int pre = size / 2 - 1;
         while (temp != null) {
             if (index == pre) {
-                removeMiddle(temp);
+                removeNext(temp);
             }
             index++;
             temp = temp.next;
@@ -150,7 +139,7 @@ class AllSolution {
         return result;
     }
 
-    private void removeMiddle(ListNode pre) {
+    private void removeNext(ListNode pre) {
         if (pre.next == null) {
             return;
         }
@@ -160,26 +149,49 @@ class AllSolution {
     }
 
     public ListNode deleteMiddle2(ListNode head) {
-        if (head==null || head.next==null){
+        if (head == null || head.next == null) {
             return null;
         }
-        if (head.next.next==null){
-            removeMiddle(head);
-            return head;
-        }
-        ListNode left = head, right = head.next.next, pre = null;
-        while (right != null) {
+        ListNode left = head, right = head, pre = null;
+        while (right != null && right.next != null) { //关键
             pre = left;
             left = left.next;
-            if (right.next != null) {
-                right = right.next.next;
-            } else {
-                right = null;
-            }
+            right = right.next.next;
         }
-        removeMiddle(pre);
+        removeNext(pre);
         return head;
     }
+
+    // 328. 奇偶链表  1 3 2 4 5
+    public ListNode oddEvenList(ListNode head) {
+        ListNode left = head;
+        if (head == null || head.next == null) { //处理0个或1个元素的时候
+            return head;
+        }
+        ListNode right = head.next, temp = right;
+        if (right.next == null) { // 处理2个元素的时候
+            return head;
+        }
+        while (right != null && right.next != null) {
+            ListNode leftNext = right.next;
+            ListNode rightNext = right.next.next;
+            left.next = leftNext;
+            left = leftNext;
+            right.next = rightNext;
+            right = rightNext;
+        }
+        left.next = temp;
+        return head;
+    }
+
+//    public static void main(String[] args) {
+//        ListNode list = new ListNode(1, new ListNode(2, new ListNode(3, new ListNode(4, new ListNode(5)))));
+//        ListNode result = new AllSolution().oddEvenList(list);
+//        while (result != null) {
+//            System.out.println(result.val);
+//            result = result.next;
+//        }
+//    }
 
     // 1768. 交替合并字符串
     public String mergeAlternately(String word1, String word2) {
@@ -222,6 +234,79 @@ class AllSolution {
 //    public static void main(String[] args) {
 //        System.out.println(new AllSolution().mergeAlternately("abcd", "pq"));
 //    }
+
+    // 2390. 从字符串中移除星号
+    public String removeStars(String s) {
+        Stack<Character> stack = new Stack<>();
+        for (char c : s.toCharArray()) {
+            stack.add(c);
+        }
+        StringBuilder stringBuilder = new StringBuilder();
+        int star = 0;
+        while (!stack.isEmpty()) {
+            Character top = stack.pop();
+            if (star == 0 && '*' != top) {
+                stringBuilder.insert(0, top);
+            }
+            if ('*' == top) {
+                star++;
+            } else if (star > 0) {
+                star--;
+            }
+        }
+        return stringBuilder.toString();
+    }
+
+    public String removeStars2(String s) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (char c : s.toCharArray()) {
+            if ('*' != c) {
+                stringBuilder.append(c);
+            } else {
+                stringBuilder.setLength(stringBuilder.length() - 1);
+            }
+        }
+        return stringBuilder.toString();
+    }
+
+//    public static void main(String[] args) {
+//        System.out.println(new AllSolution().removeStars2("leet**cod*e"));
+//    }
+
+    // 394. 字符串解码
+    public String decodeString(String s) {
+        int digit = findDigitIndex(s);
+        if (-1 == digit){
+            return s;
+        }
+        if (s.matches("\\d+\\[[a-zA-Z]+]")) {
+            int first = s.indexOf("[");
+            int last = s.lastIndexOf("]");
+            return s.substring(first+1, last).repeat(findDigit(s));
+        }
+        String substring = s.substring(digit);
+        return s.replace(substring, decodeString(substring));
+    }
+
+    private static int findDigitIndex(String s) {
+        Pattern pattern = Pattern.compile("\\d+");
+        Matcher matcher = pattern.matcher(s);
+        if (matcher.find()) {
+            return matcher.start();
+        }
+        return -1;
+    }
+    private static int findDigit(String s) {
+        Pattern pattern = Pattern.compile("\\d+");
+        Matcher matcher = pattern.matcher(s);
+        if (matcher.find()) {
+            return Integer.parseInt(matcher.group());
+        }
+        return -1;
+    }
+    public static void main(String[] args) {
+        System.out.println(new AllSolution().decodeString("abc2[cd]"));
+    }
 
     // 649. Dota2参议院
     public String predictPartyVictory(String senate) {
@@ -395,11 +480,11 @@ class AllSolution {
         nums[left] = temp;
     }
 
-    public static void main(String[] args) {
-//        Integer[] array1 = Arrays.asList(1, 2).toArray(new Integer[0]);
-        int[] array = IntStream.of(0, 1, 0, 3, 12).toArray();
-        new AllSolution().moveZeroes2(array);
-//        Arrays.stream(array).forEach(System.out::println);
-        System.out.println(Arrays.stream(array).mapToObj(String::valueOf).collect(Collectors.joining(",")));
-    }
+//    public static void main(String[] args) {
+////        Integer[] array1 = Arrays.asList(1, 2).toArray(new Integer[0]);
+//        int[] array = IntStream.of(0, 1, 0, 3, 12).toArray();
+//        new AllSolution().moveZeroes2(array);
+////        Arrays.stream(array).forEach(System.out::println);
+//        System.out.println(Arrays.stream(array).mapToObj(String::valueOf).collect(Collectors.joining(",")));
+//    }
 }
