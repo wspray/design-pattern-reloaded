@@ -1,6 +1,11 @@
 package doc;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 
 class AllSolution {
     //    1.两数之和
@@ -95,14 +100,14 @@ class AllSolution {
 
     // 206. 反转链表
     public ListNode reverseList(ListNode head) {
-        ListNode node = null;
+        ListNode reverse = null;
         while (head != null) {
-            ListNode temp = head.next;
-            head.next = node;
-            node = head;
-            head = temp;
+            ListNode next = head.next;
+            head.next = reverse;
+            reverse = head;
+            head = next;
         }
-        return node;
+        return reverse;
     }
 //    public static void main(String[] args) {
 //        ListNode listNode = new ListNode(1,new ListNode(2,new ListNode(3)));
@@ -168,7 +173,8 @@ class AllSolution {
             }
         }
         while (!radiant.isEmpty() && !dire.isEmpty()) {
-            int radiantIndex = radiant.poll(), direIndex = dire.poll();
+            int radiantIndex = radiant.poll();
+            int direIndex = dire.poll();
             if (radiantIndex < direIndex) {
                 radiant.offer(radiantIndex + n);
             } else {
@@ -180,4 +186,6 @@ class AllSolution {
 //    public static void main(String[] args) {
 //        System.out.println(new AllSolution().predictPartyVictory("RDD"));
 //    }
+
+
 }
