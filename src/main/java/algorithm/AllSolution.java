@@ -1,8 +1,20 @@
 package algorithm;
 
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
+import java.util.Stack;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 class AllSolution {
     //    1.两数之和
@@ -275,38 +287,34 @@ class AllSolution {
 
     // 394. 字符串解码
     public String decodeString(String s) {
-        int digit = findDigitIndex(s);
-        if (-1 == digit){
-            return s;
+        Stack<Integer> countStack = new Stack<>();
+        Stack<StringBuilder> stringStack = new Stack<>();
+        StringBuilder current = new StringBuilder();
+        int k = 0;
+
+        for (char ch : s.toCharArray()) {
+            if (Character.isDigit(ch)) {
+                k = k * 10 + (ch - '0');
+            } else if (ch == '[') {
+                countStack.push(k);
+                stringStack.push(current);
+                current = new StringBuilder();
+                k = 0;
+            } else if (ch == ']') {
+                StringBuilder decoded = stringStack.pop();
+                int repeat = countStack.pop();
+                decoded.append(String.valueOf(current).repeat(Math.max(0, repeat)));
+                current = decoded;
+            } else {
+                current.append(ch);
+            }
         }
-        if (s.matches("\\d+\\[[a-zA-Z]+]")) {
-            int first = s.indexOf("[");
-            int last = s.lastIndexOf("]");
-            return s.substring(first+1, last).repeat(findDigit(s));
-        }
-        String substring = s.substring(digit);
-        return s.replace(substring, decodeString(substring));
+        return current.toString();
     }
 
-    private static int findDigitIndex(String s) {
-        Pattern pattern = Pattern.compile("\\d+");
-        Matcher matcher = pattern.matcher(s);
-        if (matcher.find()) {
-            return matcher.start();
-        }
-        return -1;
-    }
-    private static int findDigit(String s) {
-        Pattern pattern = Pattern.compile("\\d+");
-        Matcher matcher = pattern.matcher(s);
-        if (matcher.find()) {
-            return Integer.parseInt(matcher.group());
-        }
-        return -1;
-    }
-    public static void main(String[] args) {
-        System.out.println(new AllSolution().decodeString("abc2[cd]"));
-    }
+//    public static void main(String[] args) {
+//        System.out.println(new AllSolution().decodeString("ab10[cd]"));//输出abccdcd
+//    }
 
     // 649. Dota2参议院
     public String predictPartyVictory(String senate) {
@@ -484,7 +492,56 @@ class AllSolution {
 ////        Integer[] array1 = Arrays.asList(1, 2).toArray(new Integer[0]);
 //        int[] array = IntStream.of(0, 1, 0, 3, 12).toArray();
 //        new AllSolution().moveZeroes2(array);
-////        Arrays.stream(array).forEach(System.out::println);
+
+    /// /        Arrays.stream(array).forEach(System.out::println);
 //        System.out.println(Arrays.stream(array).mapToObj(String::valueOf).collect(Collectors.joining(",")));
 //    }
+
+    // 643. 子数组最大平均数 I
+    public double findMaxAverage(int[] nums, int k) {
+        int left = 0, right = 0, sum = 0;
+        double avg = Integer.MIN_VALUE;
+        while (right < nums.length) {
+            sum += nums[right];
+            if (right + 1 > k) {
+                sum = sum - nums[left];
+                left++;
+                avg = Math.max(avg, sum * 1.0 / k);
+            } else if (right + 1 == k) {
+                avg = Math.max(avg, sum * 1.0 / k);
+            }
+            right++;
+        }
+        return avg;
+    }
+
+//    public static void main(String[] args) {
+//        int[] nums = {-1};
+//        System.out.println(new AllSolution().findMaxAverage(nums, 1));
+//    }
+
+    // 1456. 定长子串中元音的最大数目
+    public int maxVowels(String s, int k) {
+        Set<Character> set = Stream.of('a', 'e', 'i', 'o', 'u').collect(Collectors.toSet());
+        int[] nums = new int[s.length()];
+        char[] array = s.toCharArray();
+        int max = 0;
+        int sum = 0;
+        for (int i = 0; i < array.length; i++) {
+            nums[i] = set.contains(array[i]) ? 1 : 0;
+            sum += nums[i];
+            if (i + 1 == k) {
+                max = Math.max(max, sum);;
+            } else if (i + 1 > k) {
+                sum = sum - nums[i- k];
+                max = Math.max(max, sum);
+            }
+        }
+        return max;
+    }
+
+    // 1004. 最大连续1的个数 III
+    public int longestOnes(int[] nums, int k) {
+        return 0; //TODO
+    }
 }
