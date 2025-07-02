@@ -531,9 +531,10 @@ class AllSolution {
             nums[i] = set.contains(array[i]) ? 1 : 0;
             sum += nums[i];
             if (i + 1 == k) {
-                max = Math.max(max, sum);;
+                max = Math.max(max, sum);
+                ;
             } else if (i + 1 > k) {
-                sum = sum - nums[i- k];
+                sum = sum - nums[i - k];
                 max = Math.max(max, sum);
             }
         }
@@ -543,5 +544,20 @@ class AllSolution {
     // 1004. 最大连续1的个数 III
     public int longestOnes(int[] nums, int k) {
         return 0; //TODO
+    }
+
+    // 1732. 找到最高海拔 （前缀和思想）
+    public int largestAltitude(int[] gain) {
+        int ans = 0, sum = 0;
+        for (int x : gain) {
+            sum += x;
+            ans = Math.max(ans, sum);
+        }
+        return ans;
+    }
+
+    public static void main(String[] args) {
+        int[] gain = {-5, 1, 5, 0, -7};
+        System.out.println(new AllSolution().largestAltitude(gain));
     }
 }
