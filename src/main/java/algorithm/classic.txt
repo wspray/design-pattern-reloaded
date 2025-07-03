@@ -9,3 +9,27 @@
     }
     由所有解元素组合成问题的一个可行解；
 
+------------------------------------------------------------------------------------------------------------------------
+滑动窗口的应用场景
+1.求解固定长度的子数组/子字符串问题：
+    如最大或最小子数组和，最长不重复子字符串。
+2.求解动态条件的区间问题：
+    如满足条件的最短子数组，窗口内的元素个数统计。
+3.在线算法和数据流问题：
+    滑动窗口可以在数据流中实时计算指标。
+
+滑动窗口的逻辑可以归纳为以下模板：
+    int slidingWindow(vector<int>& nums, int target)
+    {
+     int left = 0, current_sum = 0, result = INT_MAX;
+     for (int right = 0; right < nums.size(); ++right)
+     {
+         current_sum += nums[right];  // 扩展窗口
+         while (current_sum >= target)// 符合条件，尝试缩小窗口
+         {
+             result = min(result, right - left + 1);
+             current_sum -= nums[left++];  // 移动左边界，缩小窗口
+         }
+     }
+     return result == INT_MAX ? 0 : result;  // 如果没找到满足条件的子数组返回 0
+    }

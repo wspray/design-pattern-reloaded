@@ -541,9 +541,40 @@ class AllSolution {
         return max;
     }
 
-    // 1004. 最大连续1的个数 III
+    // 1004. 最大连续1的个数 III   111000110011   不定长滑动窗口
     public int longestOnes(int[] nums, int k) {
-        return 0; //TODO
+        int left = 0, right, zeros = 0, result = 0;
+        for (right = 0; right < nums.length; right++) {
+            if (nums[right] == 0) {
+                zeros++;
+            }
+            while (zeros > k) {
+                if (nums[left] == 0) {
+                    zeros--;
+                }
+                left++;
+            }
+            result = Math.max(result, right - left + 1);
+        }
+        return result;
+    }
+
+    // 1493. 删掉一个元素以后全为1的最长子数组
+    public int longestSubarray(int[] nums) {
+        int left = 0, right, zeros = 0, result = 0;
+        for (right = 0; right < nums.length; right++) {
+            if (nums[right] == 0) {
+                zeros++;
+            }
+            while (zeros > 1) {
+                if (nums[left] == 0) {
+                    zeros--;
+                }
+                left++;
+            }
+            result = Math.max(result, right - left);
+        }
+        return result;
     }
 
     // 1732. 找到最高海拔 （前缀和思想）
@@ -556,8 +587,51 @@ class AllSolution {
         return ans;
     }
 
-    public static void main(String[] args) {
-        int[] gain = {-5, 1, 5, 0, -7};
-        System.out.println(new AllSolution().largestAltitude(gain));
+//    public static void main(String[] args) {
+//        int[] gain = {-5, 1, 5, 0, -7};
+//        System.out.println(new AllSolution().largestAltitude(gain));
+//    }
+
+    // 724. 寻找数组的中心索引
+    public int pivotIndex(int[] nums) {
+        // s[i] = sum - n[i] -s[i]
+        int sum = Arrays.stream(nums).sum();
+        int preSum = 0;
+        for (int i = 0; i < nums.length; i++) {
+            if (nums[i] == sum - 2 * preSum) {
+                return i;
+            }
+            preSum += nums[i];
+        }
+        return -1;
     }
+
+    // 2215. 找出两数组的不同
+    public List<List<Integer>> findDifference(int[] nums1, int[] nums2) {
+        List<Integer> l1 = new ArrayList<>();
+        List<Integer> l2 = new ArrayList<>();
+        List<List<Integer>> result = new ArrayList<>(2);
+        Set<Integer> s1 = new HashSet<>();
+        Set<Integer> s2 = new HashSet<>();
+        if (nums1.length > 0) {
+            s1 = Arrays.stream(nums1).boxed().collect(Collectors.toSet());
+        }
+        if (nums2.length > 0) {
+            s2 = Arrays.stream(nums2).boxed().collect(Collectors.toSet());
+        }
+        for (int i : nums1) {
+            if (!s2.contains(i) && !l1.contains(i)) {
+                l1.add(i);
+            }
+        }
+        for (int i : nums2) {
+            if (!s1.contains(i) && !l2.contains(i)) {
+                l2.add(i);
+            }
+        }
+        result.add(l1);
+        result.add(l2);
+        return result;
+    }
+
 }
