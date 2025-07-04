@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.Stack;
@@ -284,6 +285,35 @@ class AllSolution {
 //    public static void main(String[] args) {
 //        System.out.println(new AllSolution().removeStars2("leet**cod*e"));
 //    }
+
+    // 735. 小行星碰撞
+    public int[] asteroidCollision(int[] asteroids) {
+        Stack<Integer> positive = new Stack<>();
+        Stack<Integer> negative = new Stack<>();
+        for (int asteroid : asteroids) {
+            if (asteroid < 0) {
+                negative.push(asteroid);
+            } else {
+                positive.push(asteroid);
+            }
+        }
+        while (!positive.empty() && !negative.isEmpty()) {
+            if (Math.abs(positive.peek()) > Math.abs(negative.peek())) {
+                negative.pop();
+            } else if (Math.abs(positive.peek()) < Math.abs(negative.peek())) {
+                positive.pop();
+            } else {
+                negative.pop();
+                positive.pop();
+            }
+        }
+        Stack<Integer> remain = positive.empty() ? negative : positive;
+        int[] result = new int[remain.size()];
+        for (int i = 0; i < remain.size(); i++) {
+            result[i] = remain.get(i);
+        }
+        return result;
+    }
 
     // 394. 字符串解码
     public String decodeString(String s) {
@@ -611,14 +641,10 @@ class AllSolution {
         List<Integer> l1 = new ArrayList<>();
         List<Integer> l2 = new ArrayList<>();
         List<List<Integer>> result = new ArrayList<>(2);
-        Set<Integer> s1 = new HashSet<>();
-        Set<Integer> s2 = new HashSet<>();
-        if (nums1.length > 0) {
-            s1 = Arrays.stream(nums1).boxed().collect(Collectors.toSet());
-        }
-        if (nums2.length > 0) {
-            s2 = Arrays.stream(nums2).boxed().collect(Collectors.toSet());
-        }
+        nums1 = Optional.ofNullable(nums1).orElse(new int[0]);
+        nums2 = Optional.ofNullable(nums2).orElse(new int[0]);
+        Set<Integer> s1 = Arrays.stream(nums1).boxed().collect(Collectors.toSet());
+        Set<Integer> s2 = Arrays.stream(nums2).boxed().collect(Collectors.toSet());
         for (int i : nums1) {
             if (!s2.contains(i) && !l1.contains(i)) {
                 l1.add(i);
@@ -634,4 +660,96 @@ class AllSolution {
         return result;
     }
 
+//    public static void main(String[] args) {
+//        int[] nums1 = {};
+//        int[] nums2 = null;
+//        System.out.println(new AllSolution().findDifference(nums1, nums2));
+//    }
+
+    // 1207. 独一无二的出现次数
+    public boolean uniqueOccurrences(int[] arr) {
+        arr = Optional.ofNullable(arr).orElse(new int[0]);
+        Map<Integer, Integer> map = new HashMap<>();
+        for (int i : arr) {
+            map.put(i, map.getOrDefault(i, 0) + 1);
+        }
+        return map.size() == new HashSet<>(map.values()).size();
+    }
+
+    // 1657. 确定两个字符串是否接近
+    public boolean closeStrings(String word1, String word2) {
+        Map<Character, Integer> s1 = new HashMap<>();
+        Map<Character, Integer> s2 = new HashMap<>();
+        for (char c : word1.toCharArray()) {
+            s1.put(c, s1.getOrDefault(c, 0) + 1);
+        }
+        for (char c : word2.toCharArray()) {
+            if (!s1.containsKey(c)) {
+                return false;
+            }
+            s2.put(c, s2.getOrDefault(c, 0) + 1);
+        }
+        if (s1.size() != s2.size()) {
+            return false;
+        }
+        List<Integer> l1 = s1.values().stream().sorted().toList();
+        List<Integer> l2 = s2.values().stream().sorted().toList();
+        for (int i = 0; i < l1.size(); i++) {
+            if (l1.get(i).intValue() != l2.get(i).intValue()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean closeStrings2(String word1, String word2) {
+        int[] w1 = new int[26];
+        int[] w2 = new int[26];
+        for (char c : word1.toCharArray()) {
+            w1[c - 'a']++;
+        }
+        for (char c : word2.toCharArray()) {
+            w2[c - 'a']++;
+        }
+        for (int i = 0; i < w1.length; i++) {
+            if (w1[i] > 0 && w2[i] == 0 || w2[i] > 0 && w1[i] == 0) {
+                return false;
+            }
+        }
+        Arrays.sort(w1);
+        Arrays.sort(w2);
+        return Arrays.equals(w1, w2);
+    }
+
+//    public static void main(String[] args) {
+//        System.out.println(new AllSolution().closeStrings2("abc", "bca"));
+//    }
+
+    // 2352. 相等行列对
+    public int equalPairs(int[][] grid) {
+        int result = 0;
+        Map<List<Integer>, Integer> map = new HashMap<>();
+        for (int i = 0; i < grid.length; i++) {
+            List<Integer> key = Arrays.stream(grid[i]).boxed().toList();
+            map.put(key, map.getOrDefault(key, 0) + 1);
+        }
+        for (int i = 0; i < grid.length; i++) {
+            List<Integer> list = new ArrayList<>();
+            for (int j = 0; j < grid.length; j++) {
+                list.add(grid[j][i]);
+            }
+            if (map.containsKey(list)) {
+                result = result + map.get(list);
+            }
+        }
+        return result;
+    }
+
+//    public static void main(String[] args) {
+//        int[] r1 = {3, 2, 1};
+//        int[] r2 = {1, 7, 6};
+//        int[] r3 = {2, 7, 7};
+//        int[][] grid = {r1, r2, r3};
+//        System.out.println(new AllSolution().equalPairs(grid));
+//    }
 }
