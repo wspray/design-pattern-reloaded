@@ -110,14 +110,14 @@ class AllSolution {
 
     // 206. 反转链表
     public ListNode reverseList(ListNode head) {
-        ListNode reverse = null;
+        ListNode pre = null;
         while (head != null) {
             ListNode next = head.next;
-            head.next = reverse;
-            reverse = head;
+            head.next = pre;
+            pre = head;
             head = next;
         }
-        return reverse;
+        return pre;
     }
 //    public static void main(String[] args) {
 //        ListNode listNode = new ListNode(1,new ListNode(2,new ListNode(3)));
@@ -206,6 +206,48 @@ class AllSolution {
 //        }
 //    }
 
+    // 2130. 链表最大孪生和
+    public int pairSum(ListNode head) {
+        Deque<Integer> queue = new ArrayDeque<>();
+        while (head != null) {
+            queue.add(head.val);
+            head = head.next;
+        }
+        int max = 0;
+        while (!queue.isEmpty()) {
+            max = Math.max(max, queue.pollFirst() + queue.pollLast());
+        }
+        return max;
+    }
+
+
+    // 寻找中点 + 反转链表
+    public int pairSum2(ListNode head) {
+        ListNode slow = head;
+        ListNode fast = head.next;
+        while (fast != null && fast.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+        ListNode pre = null;
+        ListNode cur = slow.next;
+        slow.next = null;
+        while (cur != null) {
+            ListNode next = cur.next;
+            cur.next = pre;
+            pre = cur;
+            cur = next;
+        }
+        int max = 0;
+        while (head != null && pre != null) {
+            max = Math.max(max, head.val + pre.val);
+            head = head.next;
+            pre = pre.next;
+        }
+        return max;
+    }
+
+
     // 1768. 交替合并字符串
     public String mergeAlternately(String word1, String word2) {
         StringBuilder result = new StringBuilder();
@@ -248,129 +290,55 @@ class AllSolution {
 //        System.out.println(new AllSolution().mergeAlternately("abcd", "pq"));
 //    }
 
-    // 2390. 从字符串中移除星号
-    public String removeStars(String s) {
-        Stack<Character> stack = new Stack<>();
-        for (char c : s.toCharArray()) {
-            stack.add(c);
-        }
-        StringBuilder stringBuilder = new StringBuilder();
-        int star = 0;
-        while (!stack.isEmpty()) {
-            Character top = stack.pop();
-            if (star == 0 && '*' != top) {
-                stringBuilder.insert(0, top);
-            }
-            if ('*' == top) {
-                star++;
-            } else if (star > 0) {
-                star--;
-            }
-        }
-        return stringBuilder.toString();
-    }
 
-    public String removeStars2(String s) {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (char c : s.toCharArray()) {
-            if ('*' != c) {
-                stringBuilder.append(c);
-            } else {
-                stringBuilder.setLength(stringBuilder.length() - 1);
-            }
+    // 1071. 字符串的最大公因子
+    public String gcdOfStrings(String str1, String str2) {
+        if (str1.length() > str2.length()) {
+            String temp = str1;
+            str1 = str2;
+            str2 = temp;
         }
-        return stringBuilder.toString();
-    }
-
-//    public static void main(String[] args) {
-//        System.out.println(new AllSolution().removeStars2("leet**cod*e"));
-//    }
-
-    // 735. 小行星碰撞
-    public int[] asteroidCollision(int[] asteroids) {
-        Stack<Integer> positive = new Stack<>();
-        Stack<Integer> negative = new Stack<>();
-        for (int asteroid : asteroids) {
-            if (asteroid < 0) {
-                negative.push(asteroid);
-            } else {
-                positive.push(asteroid);
+        String result = "";
+        int length1 = str1.length();
+        for (int i = length1; i > 0; i--) {       //    最小公因子：for (int i = 1; i < length1; i++) {
+            if (str1.length() % i == 0 && str2.length() % i == 0) {
+                String substring = str1.substring(0, i);
+                if (gcd(substring, str1) && gcd(substring, str2)) {
+                    return substring;
+                }
             }
-        }
-        while (!positive.empty() && !negative.isEmpty()) {
-            if (Math.abs(positive.peek()) > Math.abs(negative.peek())) {
-                negative.pop();
-            } else if (Math.abs(positive.peek()) < Math.abs(negative.peek())) {
-                positive.pop();
-            } else {
-                negative.pop();
-                positive.pop();
-            }
-        }
-        Stack<Integer> remain = positive.empty() ? negative : positive;
-        int[] result = new int[remain.size()];
-        for (int i = 0; i < remain.size(); i++) {
-            result[i] = remain.get(i);
         }
         return result;
     }
 
-    // 394. 字符串解码
-    public String decodeString(String s) {
-        Stack<Integer> countStack = new Stack<>();
-        Stack<StringBuilder> stringStack = new Stack<>();
-        StringBuilder current = new StringBuilder();
-        int k = 0;
-
-        for (char ch : s.toCharArray()) {
-            if (Character.isDigit(ch)) {
-                k = k * 10 + (ch - '0');
-            } else if (ch == '[') {
-                countStack.push(k);
-                stringStack.push(current);
-                current = new StringBuilder();
-                k = 0;
-            } else if (ch == ']') {
-                StringBuilder decoded = stringStack.pop();
-                int repeat = countStack.pop();
-                decoded.append(String.valueOf(current).repeat(Math.max(0, repeat)));
-                current = decoded;
-            } else {
-                current.append(ch);
-            }
-        }
-        return current.toString();
+    private boolean gcd(String subString, String str) {
+        int lenx = str.length() / subString.length();
+        return subString.repeat(lenx).equals(str);
     }
 
 //    public static void main(String[] args) {
-//        System.out.println(new AllSolution().decodeString("ab10[cd]"));//输出abccdcd
+//        System.out.println(new AllSolution().gcdOfStrings("ABABABAB", "ABAB"));
 //    }
 
-    // 649. Dota2参议院
-    public String predictPartyVictory(String senate) {
-        int n = senate.length();
-        Queue<Integer> radiant = new LinkedList<>();
-        Queue<Integer> dire = new LinkedList<>();
-        for (int i = 0; i < n; ++i) {
-            if (senate.charAt(i) == 'R') {
-                radiant.offer(i);
+    // 1431. 拥有最多糖果的孩子
+    public List<Boolean> kidsWithCandies(int[] candies, int extraCandies) {
+        if (candies.length < 1) {
+            return null;
+        }
+        int max = Arrays.stream(candies).max().getAsInt();
+        List<Boolean> result = new ArrayList<>(candies.length);
+        for (int candy : candies) {
+            if (candy + extraCandies < max) {
+                result.add(false);
             } else {
-                dire.offer(i);
+                result.add(true);
             }
         }
-        while (!radiant.isEmpty() && !dire.isEmpty()) {
-            int radiantIndex = radiant.poll();
-            int direIndex = dire.poll();
-            if (radiantIndex < direIndex) {
-                radiant.offer(radiantIndex + n);
-            } else {
-                dire.offer(direIndex + n);
-            }
-        }
-        return !radiant.isEmpty() ? "Radiant" : "Dire";
+        return result;
     }
 //    public static void main(String[] args) {
-//        System.out.println(new AllSolution().predictPartyVictory("RDD"));
+//        int[] height = {1, 8, 6, 2, 5, 4, 8, 3, 7};
+//        System.out.println(new AllSolution().kidsWithCandies(height, 3));
 //    }
 
     // 151.反转字符串中的单词
@@ -412,75 +380,6 @@ class AllSolution {
 //        System.out.println(new AllSolution().reverseWords2("example   good a 1"));
 //    }
 
-    // 11. 盛最多水的容器
-    public int maxArea(int[] height) {
-        int left = 0, right = height.length - 1;
-        int max = 0;
-        while (left <= right) {
-            max = Math.max(max, (right - left) * Math.min(height[left], height[right]));
-            if (height[left] < height[right]) {
-                left++;
-            } else {
-                right--;
-            }
-        }
-        return max;
-    }
-//    public static void main(String[] args) {
-//        int[] height = {1, 8, 6, 2, 5, 4, 8, 3, 7};
-//        System.out.println(new AllSolution().maxArea(height));
-//    }
-
-    // 1431. 拥有最多糖果的孩子
-    public List<Boolean> kidsWithCandies(int[] candies, int extraCandies) {
-        if (candies.length < 1) {
-            return null;
-        }
-        int max = Arrays.stream(candies).max().getAsInt();
-        List<Boolean> result = new ArrayList<>(candies.length);
-        for (int candy : candies) {
-            if (candy + extraCandies < max) {
-                result.add(false);
-            } else {
-                result.add(true);
-            }
-        }
-        return result;
-    }
-//    public static void main(String[] args) {
-//        int[] height = {1, 8, 6, 2, 5, 4, 8, 3, 7};
-//        System.out.println(new AllSolution().kidsWithCandies(height, 3));
-//    }
-
-    // 1071. 字符串的最大公因子
-    public String gcdOfStrings(String str1, String str2) {
-        if (str1.length() > str2.length()) {
-            String temp = str1;
-            str1 = str2;
-            str2 = temp;
-        }
-        String result = "";
-        int length1 = str1.length();
-        for (int i = length1; i > 0; i--) {       //    最小公因子：for (int i = 1; i < length1; i++) {
-            if (str1.length() % i == 0 && str2.length() % i == 0) {
-                String substring = str1.substring(0, i);
-                if (gcd(substring, str1) && gcd(substring, str2)) {
-                    return substring;
-                }
-            }
-        }
-        return result;
-    }
-
-    private boolean gcd(String subString, String str) {
-        int lenx = str.length() / subString.length();
-        return subString.repeat(lenx).equals(str);
-    }
-
-//    public static void main(String[] args) {
-//        System.out.println(new AllSolution().gcdOfStrings("ABABABAB", "ABAB"));
-//    }
-
     // 283. 移动零
     public void moveZeroes(int[] nums) {
         LinkedList<Integer> list = new LinkedList<>();
@@ -519,12 +418,225 @@ class AllSolution {
     }
 
 //    public static void main(String[] args) {
-////        Integer[] array1 = Arrays.asList(1, 2).toArray(new Integer[0]);
+//        Integer[] array1 = Arrays.asList(1, 2).toArray(new Integer[0]);
 //        int[] array = IntStream.of(0, 1, 0, 3, 12).toArray();
 //        new AllSolution().moveZeroes2(array);
-
-    /// /        Arrays.stream(array).forEach(System.out::println);
+//
+//        Arrays.stream(array).forEach(System.out::println);
 //        System.out.println(Arrays.stream(array).mapToObj(String::valueOf).collect(Collectors.joining(",")));
+//    }
+
+    // 392. 判断子序列       输入：s = "abc", t = "ahbgdc"
+    public boolean isSubsequence(String s, String t) {
+        int i = 0;
+        char[] chars = t.toCharArray();
+        for (char c : s.toCharArray()) {
+            boolean subSequence = false;
+            for (int j = i; j < chars.length; j++) {
+                if (chars[j] == c) {
+                    i = j + 1;
+                    subSequence = true;
+                    break;
+                }
+            }
+            if (!subSequence) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // 11. 盛最多水的容器
+    public int maxArea(int[] height) {
+        int left = 0, right = height.length - 1;
+        int max = 0;
+        while (left <= right) {
+            max = Math.max(max, (right - left) * Math.min(height[left], height[right]));
+            if (height[left] < height[right]) {
+                left++;
+            } else {
+                right--;
+            }
+        }
+        return max;
+    }
+//    public static void main(String[] args) {
+//        int[] height = {1, 8, 6, 2, 5, 4, 8, 3, 7};
+//        System.out.println(new AllSolution().maxArea(height));
+//    }
+
+    // 1679. K和数对的最大数目     和 1.两数之和 类似。实际上就是看数组中可以构成多少对和为 k 的数对。
+    public int maxOperations(int[] nums, int k) {
+        Map<Integer, Integer> map = new HashMap<>();
+        int result = 0;
+        for (int num : nums) {
+            int diff = k - num;
+            Integer remain = map.getOrDefault(diff, 0);
+            if (remain > 0) {
+                map.put(diff, remain - 1);
+                result++;
+            } else {
+                map.merge(num, 1, Integer::sum);
+            }
+        }
+        return result;
+    }
+
+    public static void main(String[] args) {
+        int[] nums = {3, 1, 3, 4, 3};
+        int k = 6;
+        System.out.println(new AllSolution().maxOperations(nums, k));
+    }
+
+    // 2390. 从字符串中移除星号
+    public String removeStars(String s) {
+        Stack<Character> stack = new Stack<>();
+        for (char c : s.toCharArray()) {
+            stack.add(c);
+        }
+        StringBuilder stringBuilder = new StringBuilder();
+        int star = 0;
+        while (!stack.isEmpty()) {
+            Character top = stack.pop();
+            if (star == 0 && '*' != top) {
+                stringBuilder.insert(0, top);
+            }
+            if ('*' == top) {
+                star++;
+            } else if (star > 0) {
+                star--;
+            }
+        }
+        return stringBuilder.toString();
+    }
+
+    public String removeStars2(String s) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (char c : s.toCharArray()) {
+            if ('*' != c) {
+                stringBuilder.append(c);
+            } else {
+                stringBuilder.setLength(stringBuilder.length() - 1);
+            }
+        }
+        return stringBuilder.toString();
+    }
+
+//    public static void main(String[] args) {
+//        System.out.println(new AllSolution().removeStars2("leet**cod*e"));
+//    }
+
+    // 735. 小行星碰撞
+    public int[] asteroidCollision(int[] asteroids) {
+        Stack<Integer> stack = new Stack<>();
+        for (int asteroid : asteroids) {
+            boolean alive = true;
+            while (alive && !stack.isEmpty() && asteroid <= 0 && stack.peek() >= 0) {
+                if (-asteroid == stack.peek()) {
+                    stack.pop();
+                    alive = false;
+                } else if (-asteroid > stack.peek()) {
+                    stack.pop();
+                } else {
+                    alive = false;
+                }
+            }
+            if (alive) {
+                stack.add(asteroid);
+            }
+        }
+        int[] result = new int[stack.size()];
+        for (int i = 0; i < stack.size(); i++) {
+            result[i] = stack.get(i);
+        }
+        return result;
+    }
+
+//    public static void main(String[] args) {
+//        int[] asteriods = {5, 10, -5};
+//        System.out.println(Arrays.toString(new AllSolution().asteroidCollision(asteriods)));
+//    }
+
+    // 394. 字符串解码
+    public String decodeString(String s) {
+        Stack<Integer> countStack = new Stack<>();
+        Stack<StringBuilder> stringStack = new Stack<>();
+        StringBuilder current = new StringBuilder();
+        int k = 0;
+
+        for (char ch : s.toCharArray()) {
+            if (Character.isDigit(ch)) {
+                k = k * 10 + (ch - '0');
+            } else if (ch == '[') {
+                countStack.push(k);
+                stringStack.push(current);
+                current = new StringBuilder();
+                k = 0;
+            } else if (ch == ']') {
+                StringBuilder decoded = stringStack.pop();
+                int repeat = countStack.pop();
+                decoded.append(String.valueOf(current).repeat(Math.max(0, repeat)));
+                current = decoded;
+            } else {
+                current.append(ch);
+            }
+        }
+        return current.toString();
+    }
+
+//    public static void main(String[] args) {
+//        System.out.println(new AllSolution().decodeString("ab10[cd]"));//输出abccdcd
+//    }
+
+    // 933. 最近的请求次数
+    class RecentCounter {
+
+        Deque<Integer> queue;
+
+        public RecentCounter() {
+            queue = new ArrayDeque<>();
+        }
+
+        public int ping(int t) {
+            queue.add(t);
+            while (queue.peek() < t - 3000) {
+                queue.poll();
+            }
+            return queue.size();
+        }
+    }
+
+    /**
+     * Your RecentCounter object will be instantiated and called as such:
+     * RecentCounter obj = new RecentCounter();
+     * int param_1 = obj.ping(t);
+     */
+
+    // 649. Dota2参议院
+    public String predictPartyVictory(String senate) {
+        int n = senate.length();
+        Queue<Integer> radiant = new LinkedList<>();
+        Queue<Integer> dire = new LinkedList<>();
+        for (int i = 0; i < n; ++i) {
+            if (senate.charAt(i) == 'R') {
+                radiant.offer(i);
+            } else {
+                dire.offer(i);
+            }
+        }
+        while (!radiant.isEmpty() && !dire.isEmpty()) {
+            int radiantIndex = radiant.poll();
+            int direIndex = dire.poll();
+            if (radiantIndex < direIndex) {
+                radiant.offer(radiantIndex + n);
+            } else {
+                dire.offer(direIndex + n);
+            }
+        }
+        return !radiant.isEmpty() ? "Radiant" : "Dire";
+    }
+//    public static void main(String[] args) {
+//        System.out.println(new AllSolution().predictPartyVictory("RDD"));
 //    }
 
     // 643. 子数组最大平均数 I
