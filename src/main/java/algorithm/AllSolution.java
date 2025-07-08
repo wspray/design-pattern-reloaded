@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -471,24 +470,33 @@ class AllSolution {
 //        System.out.println(new AllSolution().increasingTriplet(nums));
 //    }
 
-    // 443. 压缩字符串
+    // 443. 压缩字符串 TODO
     public int compress(char[] chars) {
-        LinkedHashMap<Character, Integer> map = new LinkedHashMap<>();
-        for (char aChar : chars) {
-            map.merge(aChar, 1, Integer::sum);
+        if (chars.length < 2) {
+            return chars.length;
         }
-        final int[] index = {0};
-        map.forEach(((k, v) -> {
-            chars[index[0]] = k;
-            index[0]++;
-            if (v != 1) {
-                char[] num = String.valueOf(v).toCharArray();
-                for (char c : num) {
-                    chars[index[0]++] = c;
+        int index = 0, left = 0, right = 1, count = 0;
+        for (; right < chars.length; right++) {
+            if (chars[left] == chars[right]) {
+                count++;
+            } else {
+                chars[index++] = chars[left];
+                left = right;
+                count = 0;
+            }
+            if (count != 1) {
+                char[] numbers = String.valueOf(count + 1).toCharArray();
+                for (int i = 0; i < numbers.length; i++) {
+                    chars[index++] = numbers[i];
                 }
             }
-        }));
-        return index[0];
+        }
+        return index;
+    }
+
+    public static void main(String[] args) {
+        char[] chars = {'a', 'a', 'b', 'b', 'c', 'c', 'c'};
+        System.out.println(new AllSolution().compress(chars));
     }
 
     // 283. 移动零
@@ -555,6 +563,19 @@ class AllSolution {
             }
         }
         return true;
+    }
+
+    public boolean isSubsequence2(String s, String t) {
+        int n = s.length();
+        int m = t.length();
+        int i = 0, j = 0;
+        while (i < n && j < m) {
+            if (s.charAt(i) == t.charAt(j)) {
+                i++;
+            }
+            j++;
+        }
+        return i == n;
     }
 
     // 11. 盛最多水的容器
