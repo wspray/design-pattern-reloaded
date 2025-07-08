@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -341,6 +342,48 @@ class AllSolution {
 //        System.out.println(new AllSolution().kidsWithCandies(height, 3));
 //    }
 
+    // 605. 种花问题
+    public boolean canPlaceFlowers(int[] flowerbed, int n) {
+        int sum = 0;
+        for (int i = 0; i < flowerbed.length; i++) {
+            if (flowerbed[i] == 0
+                    && (i == 0 || flowerbed[i - 1] == 0)
+                    && (i == flowerbed.length - 1 || flowerbed[i + 1] == 0)) {
+                flowerbed[i] = -1;
+                sum++;
+            }
+        }
+        return sum >= n;
+    }
+
+    // 345. 反转字符串中的元音字母
+    public String reverseVowels(String s) {
+        char[] chars = s.toCharArray();
+        int left = 0, right = chars.length - 1;
+        while (left < right) {
+            boolean leftVowel = isVowels(chars[left]);
+            if (!leftVowel) {
+                left++;
+            }
+            boolean rightVowel = isVowels(chars[right]);
+            if (!rightVowel) {
+                right--;
+            }
+            if (leftVowel && rightVowel) {
+                char temp = chars[left];
+                chars[left] = chars[right];
+                chars[right] = temp;
+                left++;
+                right--;
+            }
+        }
+        return new String(chars);
+    }
+
+    private boolean isVowels(char ch) {
+        return "aeiouAEIOU".indexOf(ch) >= 0;
+    }
+
     // 151.反转字符串中的单词
     public String reverseWords(String s) {
         s = s.trim();
@@ -379,6 +422,74 @@ class AllSolution {
 //    public static void main(String[] args) {
 //        System.out.println(new AllSolution().reverseWords2("example   good a 1"));
 //    }
+
+    // 238. 除自身以外数组的乘积
+    public int[] productExceptSelf(int[] nums) {
+        int length = nums.length;
+        int[] left = new int[length];
+        int[] right = new int[length];
+        left[0] = 1;
+        right[length - 1] = 1;
+        for (int i = 1; i < length; i++) {
+            left[i] = left[i - 1] * nums[i - 1];
+        }
+        for (int i = length - 2; i >= 0; i--) {
+            right[i] = right[i + 1] * nums[i + 1];
+        }
+        for (int i = 0; i < nums.length; i++) {
+            nums[i] = left[i] * right[i];
+        }
+        return nums;
+    }
+
+    // 334. 递增的三元子序列
+    public boolean increasingTriplet(int[] nums) {
+        int length = nums.length;
+        if (length < 3) {
+            return false;
+        }
+        int[] leftMin = new int[length];
+        leftMin[0] = Integer.MAX_VALUE;
+        for (int i = 1; i < nums.length - 1; i++) {
+            leftMin[i] = Math.min(leftMin[i - 1], nums[i - 1]);
+        }
+        int[] rightMax = new int[length];
+        rightMax[length - 1] = Integer.MIN_VALUE;
+        for (int i = length - 2; i > -1; i--) {
+            rightMax[i] = Math.max(rightMax[i + 1], nums[i + 1]);
+        }
+        for (int i = 1; i < length - 1; i++) {
+            if (nums[i] > leftMin[i] && nums[i] < rightMax[i]) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+//    public static void main(String[] args) {
+//        int[] nums = {5, 1, 6};
+//        System.out.println(new AllSolution().increasingTriplet(nums));
+//    }
+
+    // 443. 压缩字符串
+    public int compress(char[] chars) {
+        LinkedHashMap<Character, Integer> map = new LinkedHashMap<>();
+        for (char aChar : chars) {
+            map.merge(aChar, 1, Integer::sum);
+        }
+        final int[] index = {0};
+        map.forEach(((k, v) -> {
+            chars[index[0]] = k;
+            index[0]++;
+            if (v != 1) {
+                char[] num = String.valueOf(v).toCharArray();
+                for (char c : num) {
+                    chars[index[0]++] = c;
+                }
+            }
+        }));
+        return index[0];
+    }
 
     // 283. 移动零
     public void moveZeroes(int[] nums) {
@@ -482,11 +593,11 @@ class AllSolution {
         return result;
     }
 
-    public static void main(String[] args) {
-        int[] nums = {3, 1, 3, 4, 3};
-        int k = 6;
-        System.out.println(new AllSolution().maxOperations(nums, k));
-    }
+//    public static void main(String[] args) {
+//        int[] nums = {3, 1, 3, 4, 3};
+//        int k = 6;
+//        System.out.println(new AllSolution().maxOperations(nums, k));
+//    }
 
     // 2390. 从字符串中移除星号
     public String removeStars(String s) {
