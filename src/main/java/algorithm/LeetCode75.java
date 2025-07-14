@@ -11,13 +11,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 import java.util.Stack;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-class AllSolution {
+class LeetCode75 {
     //    1.两数之和
     public int[] twoSum(int[] nums, int target) {
         Map<Integer, Integer> map = new HashMap<>();
@@ -470,34 +471,53 @@ class AllSolution {
 //        System.out.println(new AllSolution().increasingTriplet(nums));
 //    }
 
-    // 443. 压缩字符串 TODO
+    // 443. 压缩字符串
     public int compress(char[] chars) {
-        if (chars.length < 2) {
-            return chars.length;
-        }
-        int index = 0, left = 0, right = 1, count = 0;
-        for (; right < chars.length; right++) {
-            if (chars[left] == chars[right]) {
+        int index = 0, left = 0, right = 0, count = 0, length = chars.length;
+        for (; right < length; right++) {
+            if (right + 1 < length && chars[left] == chars[right + 1]) {
                 count++;
             } else {
                 chars[index++] = chars[left];
-                left = right;
-                count = 0;
-            }
-            if (count != 1) {
-                char[] numbers = String.valueOf(count + 1).toCharArray();
-                for (int i = 0; i < numbers.length; i++) {
-                    chars[index++] = numbers[i];
+                if (count != 0) {
+                    char[] numbers = String.valueOf(count + 1).toCharArray();
+                    for (char number : numbers) {
+                        chars[index++] = number;
+                    }
                 }
+                if (right + 1 < length) {
+                    left = right + 1;
+                }
+                count = 0;
             }
         }
         return index;
     }
 
-    public static void main(String[] args) {
-        char[] chars = {'a', 'a', 'b', 'b', 'c', 'c', 'c'};
-        System.out.println(new AllSolution().compress(chars));
+    public int compress2(char[] chars) {    // 三指针
+        int left = 0, right = 0, index = 0, count;
+        int length = chars.length;
+        while (right < length) {
+            while (right != length - 1 && chars[right + 1] == chars[left]) {
+                right++;
+            }
+            chars[index++] = chars[left];
+            count = right - left + 1;
+            if (count > 1) {
+                for (char c : String.valueOf(count).toCharArray()) {
+                    chars[index++] = c;
+                }
+            }
+            right++;
+            left = right;
+        }
+        return index;
     }
+
+//    public static void main(String[] args) {
+//        char[] chars = {'a', 'a', 'b', 'b', 'c', 'c', 'c'};
+//        System.out.println(new LeetCode75().compress2(chars));
+//    }
 
     // 283. 移动零
     public void moveZeroes(int[] nums) {
@@ -996,4 +1016,36 @@ class AllSolution {
 //        int[][] grid = {r1, r2, r3};
 //        System.out.println(new AllSolution().equalPairs(grid));
 //    }
+
+    // 215. 数组中的第K个最大元素
+    public int findKthLargest(int[] nums, int k) {
+        PriorityQueue<Integer> heap = new PriorityQueue<>();
+        for (int num : nums) {
+            heap.offer(num);
+            if (heap.size() > k) {
+                heap.poll();
+            }
+        }
+        return heap.peek();
+    }
+
+//    public static void main(String[] args) {
+//        int[] nums = {3, 2, 1, 5, 6, 4};
+//        int k = 2;
+//        System.out.println(new LeetCode75().findKthLargest(nums, k));
+//    }
+
+    // 2336. 无限集中的最小数字
+
+    class SmallestInfiniteSet {
+        public SmallestInfiniteSet() {
+
+        }
+        public int popSmallest() {
+
+        }
+        public void addBack(int num) {
+
+        }
+    }
 }
